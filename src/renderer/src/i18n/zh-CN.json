@@ -1,0 +1,117 @@
+{
+  "app": {
+    "subtitle": "视频时间与元数据工作台"
+  },
+  "menu": {
+    "sync": "同步时间",
+    "tools": "时间工具",
+    "inspector": "检查器",
+    "history": "操作历史"
+  },
+  "common": {
+    "addFiles": "添加文件",
+    "addFolder": "添加文件夹",
+    "clear": "清空",
+    "cancel": "取消",
+    "close": "关闭",
+    "preview": "预览变更",
+    "execute": "执行",
+    "undo": "撤销",
+    "noChanges": "没有需要变更的内容",
+    "loading": "读取中…",
+    "copy": "已复制到剪贴板",
+    "dropHint": "拖入视频文件 / 文件夹，或点击右上角按钮添加",
+    "pickFile": "选择文件"
+  },
+  "time": {
+    "source": "来源",
+    "metadata": "元数据",
+    "filename": "文件名",
+    "filesystem": "文件系统",
+    "manual": "手动",
+    "shift": "偏移",
+    "mtime": "修改时间",
+    "ctime": "创建时间",
+    "creationTime": "创建时间（元数据）"
+  },
+  "match": {
+    "exact-name": "同名",
+    "fuzzy-name": "模糊",
+    "size": "大小",
+    "duration": "时长",
+    "manual": "手动"
+  },
+  "sync": {
+    "sources": "源视频（时间是正确的）",
+    "targets": "目标视频（待修复）",
+    "autoMatch": "自动匹配",
+    "threshold": "阈值",
+    "bindSelected": "绑定选中（源 → 目标）",
+    "bindHint": "请在源列表选择 1 个文件，在目标列表选择至少 1 个文件",
+    "unbind": "解绑",
+    "method": "匹配",
+    "score": "得分",
+    "targetTime": "目标当前时间",
+    "sourceTime": "将写入的时间",
+    "unlinked": "未匹配",
+    "optMetadata": "元数据 creation_time",
+    "optMtime": "修改时间",
+    "optCtime": "创建时间 (NTFS)",
+    "executed": "执行完成：成功 {{ok}}，失败 {{fail}}"
+  },
+  "plan": {
+    "title": "变更预览（不会立即写入）",
+    "file": "文件",
+    "field": "项目",
+    "from": "原值",
+    "to": "新值",
+    "skipped": "另有 {{n}} 个文件无需变更或被跳过"
+  },
+  "tools": {
+    "title": "批量时间编辑",
+    "mode": "模式",
+    "modeAbsolute": "设定时间",
+    "modeShift": "批量偏移",
+    "modeFilename": "从文件名解析",
+    "absoluteTime": "目标时间",
+    "shiftHours": "小时",
+    "shiftMinutes": "分钟",
+    "quickPlus8": "+8 小时（时区修正）",
+    "quickMinus8": "-8 小时",
+    "filenameHint": "读取每个文件名中的时间戳（如 VID_20230101_120305.mp4）并写入"
+  },
+  "inspector": {
+    "title": "元数据检查器",
+    "noFile": "选择或拖入一个视频文件",
+    "probeFailed": "探测失败",
+    "size": "大小",
+    "streams": "流信息",
+    "tags": "标签",
+    "copyJson": "复制 JSON",
+    "file": "文件",
+    "container": "容器",
+    "duration": "时长",
+    "bitrate": "码率",
+    "video": "视频流",
+    "audio": "音频流"
+  },
+  "history": {
+    "title": "操作历史",
+    "time": "时间",
+    "operation": "操作",
+    "files": "文件数",
+    "status": "状态",
+    "done": "已执行",
+    "undone": "已撤销",
+    "empty": "暂无操作记录",
+    "undoOk": "撤销成功，文件已恢复",
+    "undoFail": "撤销失败：{{msg}}",
+    "confirmUndo": "撤销这次操作？相关文件将恢复到操作前的状态。"
+  },
+  "exec": {
+    "labelSync": "同步时间",
+    "labelSet": "设定时间",
+    "labelShift": "批量偏移",
+    "labelFilename": "从文件名写入时间"
+  }
+}

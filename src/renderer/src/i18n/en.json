@@ -1,0 +1,117 @@
+{
+  "app": {
+    "subtitle": "Video timestamps & metadata toolbox"
+  },
+  "menu": {
+    "sync": "Sync times",
+    "tools": "Time tools",
+    "inspector": "Inspector",
+    "history": "History"
+  },
+  "common": {
+    "addFiles": "Add files",
+    "addFolder": "Add folder",
+    "clear": "Clear",
+    "cancel": "Cancel",
+    "close": "Close",
+    "preview": "Preview changes",
+    "execute": "Execute",
+    "undo": "Undo",
+    "noChanges": "Nothing to change",
+    "loading": "loading…",
+    "copy": "Copied to clipboard",
+    "dropHint": "Drop video files / folders here, or use the buttons",
+    "pickFile": "Pick a file"
+  },
+  "time": {
+    "source": "Source",
+    "metadata": "metadata",
+    "filename": "filename",
+    "filesystem": "filesystem",
+    "manual": "manual",
+    "shift": "shifted",
+    "mtime": "Modified time",
+    "ctime": "Created time",
+    "creationTime": "Creation time (metadata)"
+  },
+  "match": {
+    "exact-name": "same name",
+    "fuzzy-name": "fuzzy",
+    "size": "size",
+    "duration": "duration",
+    "manual": "manual"
+  },
+  "sync": {
+    "sources": "Sources (correct times)",
+    "targets": "Targets (to be fixed)",
+    "autoMatch": "Auto match",
+    "threshold": "Threshold",
+    "bindSelected": "Bind selected (source → target)",
+    "bindHint": "Select 1 source and at least 1 target first",
+    "unbind": "Unbind",
+    "method": "Match",
+    "score": "Score",
+    "targetTime": "Target current time",
+    "sourceTime": "Time to write",
+    "unlinked": "unmatched",
+    "optMetadata": "Metadata creation_time",
+    "optMtime": "Modified time",
+    "optCtime": "Created time (NTFS)",
+    "executed": "Done: {{ok}} succeeded, {{fail}} failed"
+  },
+  "plan": {
+    "title": "Change preview (dry run)",
+    "file": "File",
+    "field": "Field",
+    "from": "From",
+    "to": "To",
+    "skipped": "{{n}} file(s) skipped or already consistent"
+  },
+  "tools": {
+    "title": "Batch time editor",
+    "mode": "Mode",
+    "modeAbsolute": "Set time",
+    "modeShift": "Shift",
+    "modeFilename": "From filename",
+    "absoluteTime": "Target time",
+    "shiftHours": "hours",
+    "shiftMinutes": "minutes",
+    "quickPlus8": "+8h (timezone fix)",
+    "quickMinus8": "-8h",
+    "filenameHint": "Read the timestamp in each filename (e.g. VID_20230101_120305.mp4) and write it"
+  },
+  "inspector": {
+    "title": "Metadata inspector",
+    "noFile": "Pick or drop a video file",
+    "probeFailed": "Probe failed",
+    "size": "Size",
+    "streams": "Streams",
+    "tags": "Tags",
+    "copyJson": "Copy JSON",
+    "file": "File",
+    "container": "Container",
+    "duration": "Duration",
+    "bitrate": "Bitrate",
+    "video": "Video",
+    "audio": "Audio"
+  },
+  "history": {
+    "title": "Operation history",
+    "time": "Time",
+    "operation": "Operation",
+    "files": "Files",
+    "status": "Status",
+    "done": "done",
+    "undone": "undone",
+    "empty": "No operations yet",
+    "undoOk": "Undo succeeded, files restored",
+    "undoFail": "Undo failed: {{msg}}",
+    "confirmUndo": "Undo this operation? All related files will be restored to their previous state."
+  },
+  "exec": {
+    "labelSync": "Sync times",
+    "labelSet": "Set time",
+    "labelShift": "Shift times",
+    "labelFilename": "Apply filename times"
+  }
+}
