@@ -1,21 +1,13 @@
 import { useState } from 'react'
-import {
-  App,
-  Button,
-  Collapse,
-  Descriptions,
-  Divider,
-  Empty,
-  Spin,
-  Table,
-  Tag
-} from 'antd'
+import { App, Button, Collapse, Descriptions, Spin, Table, Tag } from 'antd'
 import { FileSearchOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { formatDuration, formatSize } from '@renderer/components/FileListPanel'
 import { formatLocal, parseFfprobeDate } from '@core/time-engine'
 import type { MediaInfo } from '@shared/index'
 import { ck } from '@renderer/services/ck'
+import PageHeader from '@renderer/components/PageHeader'
+import EmptyState from '@renderer/components/EmptyState'
 
 export default function InspectorPage() {
   const { t } = useTranslation()
@@ -70,99 +62,128 @@ export default function InspectorPage() {
         void onDrop(e)
       }}
     >
-      <Button type="primary" icon={<FileSearchOutlined />} onClick={() => void pick()}>
-        {t('inspector.title')}
-      </Button>
+      <PageHeader
+        title={t('menu.inspector')}
+        desc={t('desc.inspector')}
+        actions={
+          <Button type="primary" icon={<FileSearchOutlined />} onClick={() => void pick()}>
+            {t('common.pickFile')}
+          </Button>
+        }
+      />
+
       <Spin spinning={loading}>
         {!info ? (
-          <Empty description={t('inspector.noFile')} style={{ marginTop: 120 }} />
+          <div className="ck-panel">
+            <EmptyState icon="🔍" title={t('inspector.noFile')} hint={t('common.dropHint')} />
+          </div>
         ) : (
-          <div style={{ marginTop: 16 }}>
-            <Descriptions
-              size="small"
-              bordered
-              column={2}
-              items={[
-                { key: 'file', label: t('inspector.file'), children: <span title={info.path}>{info.path}</span>, span: 2 },
-                { key: 'container', label: t('inspector.container'), children: info.formatName ?? '—' },
-                { key: 'size', label: t('inspector.size'), children: formatSize(info.size) },
-                {
-                  key: 'duration',
-                  label: t('inspector.duration'),
-                  children: formatDuration(info.durationSec) || '—'
-                },
-                {
-                  key: 'bitrate',
-                  label: t('inspector.bitrate'),
-                  children: info.bitrate ? `${Math.round(info.bitrate / 1000)} kbps` : '—'
-                },
-                {
-                  key: 'creation',
-                  label: t('time.creationTime'),
-                  children: creation ? (
-                    <span>
-                      {formatLocal(creation)}{' '}
-                      <Tag color="blue" style={{ marginInlineStart: 8 }}>
-                        {t('time.metadata')}
-                      </Tag>
-                    </span>
-                  ) : (
-                    <Tag color="warning">--</Tag>
-                  )
-                }
-              ]}
-            />
+          <div>
+            <div className="ck-panel">
+              <div className="ck-panel-head">
+                <div className="ck-panel-title">
+                  <span title={info.path}>{info.path}</span>
+                </div>
+                <Button size="small" onClick={() => void copyJson()}>
+                  {t('inspector.copyJson')}
+                </Button>
+              </div>
+              <div className="ck-panel-body">
+                <Descriptions
+                  size="small"
+                  bordered
+                  column={3}
+                  items={[
+                    { key: 'container', label: t('inspector.container'), children: info.formatName ?? '—' },
+                    { key: 'size', label: t('inspector.size'), children: formatSize(info.size) },
+                    {
+                      key: 'duration',
+                      label: t('inspector.duration'),
+                      children: formatDuration(info.durationSec) || '—'
+                    },
+                    {
+                      key: 'bitrate',
+                      label: t('inspector.bitrate'),
+                      children: info.bitrate ? `${Math.round(info.bitrate / 1000)} kbps` : '—'
+                    },
+                    {
+                      key: 'creation',
+                      label: t('time.creationTime'),
+                      span: 2,
+                      children: creation ? (
+                        <span>
+                          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatLocal(creation)}</span>
+                          <Tag color="blue" style={{ marginInlineStart: 10 }}>
+                            {t('time.metadata')}
+                          </Tag>
+                        </span>
+                      ) : (
+                        <Tag color="warning">--</Tag>
+                      )
+                    }
+                  ]}
+                />
+              </div>
+            </div>
 
-            <Divider>{t('inspector.streams')}</Divider>
-            <Collapse
-              items={info.streams.map((s) => ({
-                key: String(s.index),
-                label: `#${s.index} ${s.type} · ${s.codec ?? ''}${
-                  s.width ? ` · ${s.width}x${s.height}` : ''
-                }${s.fps ? ` · ${s.fps} fps` : ''}`,
-                children: (
-                  <Descriptions
-                    size="small"
-                    bordered
-                    column={2}
-                    items={[
-                      { key: 'type', label: 'type', children: s.type },
-                      { key: 'codec', label: 'codec', children: s.codec ?? '—' },
-                      ...(s.width
-                        ? [{ key: 'res', label: 'resolution', children: `${s.width}x${s.height}` }]
-                        : []),
-                      ...(s.fps ? [{ key: 'fps', label: 'fps', children: String(s.fps) }] : []),
-                      ...(s.sampleRate
-                        ? [{ key: 'sr', label: 'sample rate', children: `${s.sampleRate} Hz` }]
-                        : []),
-                      ...(s.channels
-                        ? [{ key: 'ch', label: 'channels', children: String(s.channels) }]
-                        : []),
-                      ...(s.durationSec
-                        ? [{ key: 'dur', label: 'duration', children: formatDuration(s.durationSec) }]
-                        : [])
-                    ]}
-                  />
-                )
-              }))}
-            />
+            <div className="ck-panel" style={{ marginTop: 12 }}>
+              <div className="ck-panel-head">
+                <div className="ck-panel-title">{t('inspector.streams')}</div>
+              </div>
+              <div className="ck-panel-body">
+                <Collapse
+                  items={info.streams.map((s) => ({
+                    key: String(s.index),
+                    label: `#${s.index} ${s.type} · ${s.codec ?? ''}${
+                      s.width ? ` · ${s.width}×${s.height}` : ''
+                    }${s.fps ? ` · ${s.fps} fps` : ''}`,
+                    children: (
+                      <Descriptions
+                        size="small"
+                        bordered
+                        column={2}
+                        items={[
+                          { key: 'type', label: 'type', children: s.type },
+                          { key: 'codec', label: 'codec', children: s.codec ?? '—' },
+                          ...(s.width
+                            ? [{ key: 'res', label: 'resolution', children: `${s.width}×${s.height}` }]
+                            : []),
+                          ...(s.fps ? [{ key: 'fps', label: 'fps', children: String(s.fps) }] : []),
+                          ...(s.sampleRate
+                            ? [{ key: 'sr', label: 'sample rate', children: `${s.sampleRate} Hz` }]
+                            : []),
+                          ...(s.channels
+                            ? [{ key: 'ch', label: 'channels', children: String(s.channels) }]
+                            : []),
+                          ...(s.durationSec
+                            ? [{ key: 'dur', label: 'duration', children: formatDuration(s.durationSec) }]
+                            : [])
+                        ]}
+                      />
+                    )
+                  }))}
+                />
+              </div>
+            </div>
 
-            <Divider>{t('inspector.tags')}</Divider>
-            <Table
-              size="small"
-              rowKey={(r) => r.k}
-              dataSource={Object.entries(info.tags).map(([k, v]) => ({ k, v }))}
-              pagination={false}
-              scroll={{ y: 260 }}
-              columns={[
-                { title: 'key', dataIndex: 'k', width: 260 },
-                { title: 'value', dataIndex: 'v' }
-              ]}
-              locale={{ emptyText: '—' }}
-            />
-
-            <div style={{ marginTop: 12 }}>
-              <Button onClick={() => void copyJson()}>{t('inspector.copyJson')}</Button>
+            <div className="ck-panel" style={{ marginTop: 12 }}>
+              <div className="ck-panel-head">
+                <div className="ck-panel-title">{t('inspector.tags')}</div>
+              </div>
+              <div className="ck-panel-body">
+                <Table
+                  size="small"
+                  rowKey={(r) => r.k}
+                  dataSource={Object.entries(info.tags).map(([k, v]) => ({ k, v }))}
+                  pagination={false}
+                  scroll={{ y: 240 }}
+                  columns={[
+                    { title: 'key', dataIndex: 'k', width: 280 },
+                    { title: 'value', dataIndex: 'v' }
+                  ]}
+                  locale={{ emptyText: '—' }}
+                />
+              </div>
             </div>
           </div>
         )}

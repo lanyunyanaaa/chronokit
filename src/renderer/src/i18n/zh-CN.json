@@ -2,6 +2,16 @@
   "app": {
     "subtitle": "视频时间与元数据工作台"
   },
+  "desc": {
+    "sync": "把源视频的真实时间修复到目标视频：匹配 → 预览 → 执行，全程可撤销",
+    "tools": "没有源文件？直接设定、批量偏移，或从文件名解析时间",
+    "inspector": "查看视频的完整元数据：容器、流与标签",
+    "history": "所有写入操作都会记录在案，可跨会话撤销"
+  },
+  "status": {
+    "ffmpegOk": "FFmpeg 就绪",
+    "ffmpegBad": "未找到 FFmpeg"
+  },
   "menu": {
     "sync": "同步时间",
     "tools": "时间工具",
@@ -20,6 +30,7 @@
     "noChanges": "没有需要变更的内容",
     "loading": "读取中…",
     "copy": "已复制到剪贴板",
+    "remove": "移除",
     "dropHint": "拖入视频文件 / 文件夹，或点击右上角按钮添加",
     "pickFile": "选择文件"
   },
@@ -45,6 +56,8 @@
     "sources": "源视频（时间是正确的）",
     "targets": "目标视频（待修复）",
     "autoMatch": "自动匹配",
+    "matchResult": "匹配结果",
+    "tableEmpty": "添加目标视频后，这里显示匹配与同步计划",
     "threshold": "阈值",
     "bindSelected": "绑定选中（源 → 目标）",
     "bindHint": "请在源列表选择 1 个文件，在目标列表选择至少 1 个文件",

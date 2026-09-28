@@ -1,35 +1,31 @@
-import { Tag, Tooltip } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { formatLocal, parseFfprobeDate } from '@core/time-engine'
 import type { VideoItem } from '@renderer/store/appStore'
 
-/** Badges: metadata creation_time (blue) and filename timestamp (purple). */
+/** Chips: metadata creation_time (blue) and filename timestamp (purple). */
 export default function TimeBadges({ item }: { item: VideoItem }) {
   const { t } = useTranslation()
   const meta = item.creationTimeIso ? parseFfprobeDate(item.creationTimeIso) : null
   const fname = item.filenameTimeIso ? new Date(item.filenameTimeIso) : null
 
   return (
-    <span style={{ display: 'inline-flex', gap: 4, flexWrap: 'wrap' }}>
+    <span className="ck-file-chips">
       {meta ? (
-        <Tooltip title={t('time.creationTime')}>
-          <Tag color="blue" style={{ marginInlineEnd: 0 }}>
-            {formatLocal(meta)}
-          </Tag>
-        </Tooltip>
+        <span className="ck-chip ck-chip-blue" title={t('time.creationTime')}>
+          {formatLocal(meta)}
+        </span>
       ) : (
-        <Tooltip title={t('time.creationTime')}>
-          <Tag color="warning" style={{ marginInlineEnd: 0 }}>
-            --
-          </Tag>
-        </Tooltip>
+        <span className="ck-chip ck-chip-warn" title={t('time.creationTime')}>
+          --:--:--
+        </span>
       )}
       {fname ? (
-        <Tooltip title={`${t('time.filename')}${item.filenamePattern ? ` · ${item.filenamePattern}` : ''}`}>
-          <Tag color="purple" style={{ marginInlineEnd: 0 }}>
-            {formatLocal(fname)}
-          </Tag>
-        </Tooltip>
+        <span
+          className="ck-chip ck-chip-purple"
+          title={`${t('time.filename')}${item.filenamePattern ? ` · ${item.filenamePattern}` : ''}`}
+        >
+          {formatLocal(fname)}
+        </span>
       ) : null}
     </span>
   )

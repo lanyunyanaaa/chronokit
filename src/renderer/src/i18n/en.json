@@ -2,6 +2,16 @@
   "app": {
     "subtitle": "Video timestamps & metadata toolbox"
   },
+  "desc": {
+    "sync": "Repair target videos with the true times of their sources: match → preview → execute, undoable",
+    "tools": "No source files? Set, batch-shift, or parse times from filenames",
+    "inspector": "Inspect full video metadata: container, streams and tags",
+    "history": "Every write is journaled and can be undone across sessions"
+  },
+  "status": {
+    "ffmpegOk": "FFmpeg ready",
+    "ffmpegBad": "FFmpeg not found"
+  },
   "menu": {
     "sync": "Sync times",
     "tools": "Time tools",
@@ -20,6 +30,7 @@
     "noChanges": "Nothing to change",
     "loading": "loading…",
     "copy": "Copied to clipboard",
+    "remove": "Remove",
     "dropHint": "Drop video files / folders here, or use the buttons",
     "pickFile": "Pick a file"
   },
@@ -45,6 +56,8 @@
     "sources": "Sources (correct times)",
     "targets": "Targets (to be fixed)",
     "autoMatch": "Auto match",
+    "matchResult": "Matched pairs",
+    "tableEmpty": "Add target videos to see matching and the sync plan here",
     "threshold": "Threshold",
     "bindSelected": "Bind selected (source → target)",
     "bindHint": "Select 1 source and at least 1 target first",

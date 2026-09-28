@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { App, Button, Card, Popconfirm, Table, Tag } from 'antd'
+import { App, Button, Popconfirm, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useTranslation } from 'react-i18next'
 import { formatLocal } from '@core/time-engine'
 import type { JournalFileEntry, JournalOp } from '@shared/index'
 import { ck } from '@renderer/services/ck'
+import PageHeader from '@renderer/components/PageHeader'
 
 export default function HistoryPage() {
   const { t } = useTranslation()
@@ -44,14 +45,14 @@ export default function HistoryPage() {
       title: 'backup',
       dataIndex: 'backupPath',
       width: 90,
-      render: (v?: string) => (v ? <Tag color="gold">✓</Tag> : '—')
+      render: (v?: string) => (v ? <Tag color="gold">✓</Tag> : <span style={{ color: '#5f6879' }}>—</span>)
     },
     {
       title: 'error',
       dataIndex: 'error',
       width: 260,
       ellipsis: true,
-      render: (v?: string) => (v ? <Tag color="error">{v}</Tag> : '—')
+      render: (v?: string) => (v ? <Tag color="error">{v}</Tag> : <span style={{ color: '#5f6879' }}>—</span>)
     }
   ]
 
@@ -60,7 +61,9 @@ export default function HistoryPage() {
       title: t('history.time'),
       dataIndex: 'ts',
       width: 175,
-      render: (ts: number) => formatLocal(new Date(ts))
+      render: (ts: number) => (
+        <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatLocal(new Date(ts))}</span>
+      )
     },
     { title: t('history.operation'), dataIndex: 'label' },
     { title: t('history.files'), width: 90, render: (_, op) => op.entries.length },
@@ -69,7 +72,11 @@ export default function HistoryPage() {
       dataIndex: 'status',
       width: 110,
       render: (s: string) =>
-        s === 'done' ? <Tag color="processing">{t('history.done')}</Tag> : <Tag>{t('history.undone')}</Tag>
+        s === 'done' ? (
+          <Tag color="processing">{t('history.done')}</Tag>
+        ) : (
+          <Tag>{t('history.undone')}</Tag>
+        )
     },
     {
       title: '',
@@ -91,27 +98,32 @@ export default function HistoryPage() {
   ]
 
   return (
-    <Card size="small" title={t('history.title')}>
-      <Table
-        size="small"
-        rowKey="id"
-        loading={loading}
-        dataSource={[...ops].reverse()}
-        columns={columns}
-        pagination={{ pageSize: 15 }}
-        locale={{ emptyText: t('history.empty') }}
-        expandable={{
-          expandedRowRender: (op) => (
-            <Table
-              size="small"
-              rowKey={(e) => `${op.id}_${e.path}`}
-              dataSource={op.entries}
-              columns={entryColumns}
-              pagination={false}
-            />
-          )
-        }}
-      />
-    </Card>
+    <div>
+      <PageHeader title={t('menu.history')} desc={t('desc.history')} />
+      <div className="ck-panel">
+        <div className="ck-panel-body" style={{ padding: 4 }}>
+          <Table
+            size="small"
+            rowKey="id"
+            loading={loading}
+            dataSource={[...ops].reverse()}
+            columns={columns}
+            pagination={{ pageSize: 15 }}
+            locale={{ emptyText: t('history.empty') }}
+            expandable={{
+              expandedRowRender: (op) => (
+                <Table
+                  size="small"
+                  rowKey={(e) => `${op.id}_${e.path}`}
+                  dataSource={op.entries}
+                  columns={entryColumns}
+                  pagination={false}
+                />
+              )
+            }}
+          />
+        </div>
+      </div>
+    </div>
   )
 }

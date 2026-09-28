@@ -1,11 +1,12 @@
 import { useState, type ReactNode } from 'react'
-import { Button, Card, Empty, List, Space } from 'antd'
+import { Button, Space } from 'antd'
 import { ClearOutlined, FileAddOutlined, FolderAddOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { ck } from '@renderer/services/ck'
 import { useAppStore, type Kind, type VideoItem } from '@renderer/store/appStore'
 import Thumb from './Thumb'
 import TimeBadges from './TimeBadges'
+import EmptyState from './EmptyState'
 
 interface Props {
   kind: Kind
@@ -79,7 +80,7 @@ export default function FileListPanel({ kind, title, selectedPaths, onSelectionC
 
   return (
     <div
-      className={dragOver ? 'ck-drop-active' : undefined}
+      className={`ck-panel ${dragOver ? 'ck-drop-active' : ''}`}
       onDragOver={(e) => {
         e.preventDefault()
         setDragOver(true)
@@ -89,81 +90,64 @@ export default function FileListPanel({ kind, title, selectedPaths, onSelectionC
         void onDrop(e)
       }}
     >
-      <Card
-        size="small"
-        title={title}
-        styles={{ body: { padding: 6 } }}
-        extra={
-          <Space size={4} wrap>
-            {extra}
-            <Button size="small" icon={<FileAddOutlined />} onClick={() => void addFromDialog('files')}>
-              {t('common.addFiles')}
-            </Button>
-            <Button size="small" icon={<FolderAddOutlined />} onClick={() => void addFromDialog('folder')}>
-              {t('common.addFolder')}
-            </Button>
-            {selectedPaths.length > 0 && (
-              <Button size="small" onClick={removeSelected}>
-                {t('common.undo')}({selectedPaths.length})
-              </Button>
-            )}
-            <Button size="small" icon={<ClearOutlined />} disabled={!items.length} onClick={clear}>
-              {t('common.clear')}
-            </Button>
-          </Space>
-        }
-      >
-        <div style={{ maxHeight: 400, overflow: 'auto' }}>
-          {items.length === 0 ? (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={t('common.dropHint')}
-              style={{ padding: '28px 0' }}
-            />
-          ) : (
-            <List
-              dataSource={items}
-              rowKey={(i: VideoItem) => i.path}
-              split={false}
-              renderItem={(item) => {
-                const selected = selectedPaths.includes(item.path)
-                return (
-                  <List.Item
-                    onClick={() => toggleSelect(item.path)}
-                    style={{
-                      cursor: 'pointer',
-                      padding: '6px 8px',
-                      borderRadius: 8,
-                      background: selected ? 'rgba(22, 119, 255, 0.18)' : undefined
-                    }}
-                  >
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', width: '100%' }}>
-                      <Thumb item={item} kind={kind} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          title={item.path}
-                          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                        >
-                          {item.name}
-                        </div>
-                        <div style={{ marginTop: 2 }}>
-                          <TimeBadges item={item} />
-                        </div>
-                        <div style={{ color: '#8a8a8a', fontSize: 12, marginTop: 2 }}>
-                          {formatSize(item.size)}
-                          {item.durationSec ? ` · ${formatDuration(item.durationSec)}` : ''}
-                          {item.probing ? ` · ${t('common.loading')}` : ''}
-                          {item.probeFailed ? ' · !' : ''}
-                        </div>
-                      </div>
-                    </div>
-                  </List.Item>
-                )
-              }}
-            />
-          )}
+      <div className="ck-panel-head">
+        <div className="ck-panel-title">
+          {title}
+          {items.length > 0 && <span className="ck-count">{items.length}</span>}
         </div>
-      </Card>
+        <Space size={4} wrap>
+          {extra}
+          <Button size="small" icon={<FileAddOutlined />} onClick={() => void addFromDialog('files')}>
+            {t('common.addFiles')}
+          </Button>
+          <Button size="small" icon={<FolderAddOutlined />} onClick={() => void addFromDialog('folder')}>
+            {t('common.addFolder')}
+          </Button>
+          {selectedPaths.length > 0 && (
+            <Button size="small" onClick={removeSelected}>
+              {t('common.remove')}({selectedPaths.length})
+            </Button>
+          )}
+          <Button
+            size="small"
+            type="text"
+            icon={<ClearOutlined />}
+            disabled={!items.length}
+            onClick={clear}
+          />
+        </Space>
+      </div>
+      <div className="ck-panel-body">
+        {items.length === 0 ? (
+          <EmptyState icon="🎬" title={t('common.dropHint')} />
+        ) : (
+          <div className="ck-file-list">
+            {items.map((item) => {
+              const selected = selectedPaths.includes(item.path)
+              return (
+                <div
+                  key={item.path}
+                  className={`ck-file ${selected ? 'is-selected' : ''}`}
+                  title={item.path}
+                  onClick={() => toggleSelect(item.path)}
+                >
+                  <Thumb item={item} kind={kind} />
+                  <div className="ck-file-info">
+                    <div className="ck-file-name">{item.name}</div>
+                    <TimeBadges item={item} />
+                    <div className="ck-file-meta">
+                      {formatSize(item.size)}
+                      {item.durationSec ? ` · ${formatDuration(item.durationSec)}` : ''}
+                      {item.probing ? ` · ${t('common.loading')}` : ''}
+                      {item.probeFailed ? ' · !' : ''}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

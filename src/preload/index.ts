@@ -32,6 +32,17 @@ const api = {
   /** Resolve the absolute path of a File dropped from the OS. */
   getPathForFile: (file: File): string => webUtils.getPathForFile(file),
 
+  minimizeWindow: (): void => ipcRenderer.send('win:minimize'),
+  toggleMaximize: (): void => ipcRenderer.send('win:toggle-maximize'),
+  closeWindow: (): void => ipcRenderer.send('win:close'),
+  onWindowState: (cb: (maximized: boolean) => void): (() => void) => {
+    const listener = (_e: IpcRendererEvent, v: boolean): void => cb(v)
+    ipcRenderer.on('win:maximized', listener)
+    return () => {
+      ipcRenderer.removeListener('win:maximized', listener)
+    }
+  },
+
   onTaskProgress: (cb: (p: TaskProgress) => void): (() => void) => {
     const listener = (_e: IpcRendererEvent, p: TaskProgress): void => cb(p)
     ipcRenderer.on('task-progress', listener)

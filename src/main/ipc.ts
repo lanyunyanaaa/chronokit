@@ -14,6 +14,17 @@ const VIDEO_FILTER = {
 }
 
 export function registerIpc(): void {
+  ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize())
+
+  ipcMain.on('win:toggle-maximize', (e) => {
+    const w = BrowserWindow.fromWebContents(e.sender)
+    if (!w) return
+    if (w.isMaximized()) w.unmaximize()
+    else w.maximize()
+  })
+
+  ipcMain.on('win:close', (e) => BrowserWindow.fromWebContents(e.sender)?.close())
+
   ipcMain.handle('dialog:select-files', async (e) => {
     const win = BrowserWindow.fromWebContents(e.sender)
     const r = await dialog.showOpenDialog(win!, {

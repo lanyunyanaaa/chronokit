@@ -10,6 +10,7 @@ import { ck } from '@renderer/services/ck'
 import { useAppStore, type VideoItem } from '@renderer/store/appStore'
 import FileListPanel from '@renderer/components/FileListPanel'
 import PlanModal from '@renderer/components/PlanModal'
+import PageHeader from '@renderer/components/PageHeader'
 
 const isWin = navigator.userAgent.includes('Windows')
 
@@ -97,20 +98,20 @@ export default function SyncPage() {
     },
     {
       title: t('sync.targetTime'),
-      width: 175,
+      width: 150,
       render: (_, rec) => {
         const meta = rec.creationTimeIso ? parseFfprobeDate(rec.creationTimeIso) : null
         return (
           <span>
             {meta ? formatLocal(meta) : <Tag color="warning">--</Tag>}
-            <div style={{ color: '#8a8a8a', fontSize: 12 }}>{formatLocal(new Date(rec.mtimeMs))}</div>
+            <div style={{ color: '#5f6879', fontSize: 11.5 }}>{formatLocal(new Date(rec.mtimeMs))}</div>
           </span>
         )
       }
     },
     {
       title: t('sync.method'),
-      width: 200,
+      width: 165,
       render: (_, rec) => (
         <Select
           size="small"
@@ -125,10 +126,10 @@ export default function SyncPage() {
     },
     {
       title: t('sync.score'),
-      width: 90,
+      width: 88,
       render: (_, rec) => {
         const p = pairs[rec.path]
-        if (!p) return '—'
+        if (!p) return <span style={{ color: '#5f6879' }}>—</span>
         const color: Record<MatchMethod, string> = {
           'exact-name': 'success',
           'fuzzy-name': 'processing',
@@ -141,11 +142,11 @@ export default function SyncPage() {
     },
     {
       title: t('sync.sourceTime'),
-      width: 165,
+      width: 200,
       render: (_, rec) => {
         const p = pairs[rec.path]
         const src = p ? sourceMap.get(p.sourcePath) : null
-        if (!src) return '—'
+        if (!src) return <span style={{ color: '#5f6879' }}>—</span>
         const picked = pickSourceTime({
           metadataTime: src.creationTimeIso ? parseFfprobeDate(src.creationTimeIso) : null,
           filenameTime: src.filenameTimeIso ? new Date(src.filenameTimeIso) : null,
@@ -153,9 +154,9 @@ export default function SyncPage() {
         })
         if (!picked) return <Tag color="warning">--</Tag>
         return (
-          <span>
-            <Tag style={{ marginInlineEnd: 4 }}>{t(`time.${picked.source}`)}</Tag>
-            {formatLocal(picked.date)}
+          <span style={{ whiteSpace: 'nowrap' }}>
+            <Tag style={{ marginInlineEnd: 5 }}>{t(`time.${picked.source}`)}</Tag>
+            <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatLocal(picked.date)}</span>
           </span>
         )
       }
@@ -164,59 +165,69 @@ export default function SyncPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <FileListPanel
-            kind="sources"
-            title={t('sync.sources')}
-            selectedPaths={selSources}
-            onSelectionChange={setSelSources}
-          />
+      <PageHeader title={t('menu.sync')} desc={t('desc.sync')} />
+
+      <div className="ck-sync-grid">
+        <FileListPanel
+          kind="sources"
+          title={t('sync.sources')}
+          selectedPaths={selSources}
+          onSelectionChange={setSelSources}
+        />
+        <FileListPanel
+          kind="targets"
+          title={t('sync.targets')}
+          selectedPaths={selTargets}
+          onSelectionChange={setSelTargets}
+        />
+      </div>
+
+      <div className="ck-panel" style={{ marginTop: 12 }}>
+        <div className="ck-panel-head">
+          <div className="ck-panel-title">
+            {t('sync.matchResult')}
+            <span className="ck-count">
+              {Object.keys(pairs).length}/{targets.length}
+            </span>
+          </div>
+          <Space size={8}>
+            <span style={{ color: '#9aa3b4', fontSize: 12.5 }}>{t('sync.threshold')}</span>
+            <InputNumber
+              size="small"
+              min={0.5}
+              max={1}
+              step={0.05}
+              value={threshold}
+              onChange={(v) => setThreshold(v ?? 0.75)}
+              style={{ width: 78 }}
+            />
+            <Button
+              size="small"
+              icon={<LinkOutlined />}
+              disabled={!sources.length || !targets.length || busy}
+              onClick={runMatch}
+            >
+              {t('sync.autoMatch')}
+            </Button>
+            <Button size="small" onClick={bindSelected} disabled={busy}>
+              {t('sync.bindSelected')}
+            </Button>
+          </Space>
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <FileListPanel
-            kind="targets"
-            title={t('sync.targets')}
-            selectedPaths={selTargets}
-            onSelectionChange={setSelTargets}
+        <div className="ck-panel-body" style={{ paddingTop: 4 }}>
+          <Table
+            size="small"
+            tableLayout="fixed"
+            rowKey="path"
+            dataSource={targets}
+            columns={columns}
+            pagination={false}
+            locale={{ emptyText: t('sync.tableEmpty') }}
           />
         </div>
       </div>
 
-      <Space wrap style={{ marginTop: 12 }}>
-        <Button
-          icon={<LinkOutlined />}
-          disabled={!sources.length || !targets.length || busy}
-          onClick={runMatch}
-        >
-          {t('sync.autoMatch')}
-        </Button>
-        <span style={{ color: '#8a8a8a' }}>{t('sync.threshold')}</span>
-        <InputNumber
-          min={0.5}
-          max={1}
-          step={0.05}
-          value={threshold}
-          onChange={(v) => setThreshold(v ?? 0.75)}
-          style={{ width: 84 }}
-        />
-        <Button onClick={bindSelected} disabled={busy}>
-          {t('sync.bindSelected')}
-        </Button>
-      </Space>
-
-      <Table
-        style={{ marginTop: 12 }}
-        size="small"
-        rowKey="path"
-        dataSource={targets}
-        columns={columns}
-        pagination={targets.length > 12 ? { pageSize: 12 } : false}
-        scroll={{ y: 300 }}
-        locale={{ emptyText: t('common.dropHint') }}
-      />
-
-      <Space wrap style={{ marginTop: 12 }} align="center">
+      <div className="ck-toolbar" style={{ marginTop: 12 }}>
         <Checkbox checked={optMetadata} onChange={(e) => setOptMetadata(e.target.checked)}>
           {t('sync.optMetadata')}
         </Checkbox>
@@ -228,6 +239,7 @@ export default function SyncPage() {
             {t('sync.optCtime')}
           </Checkbox>
         )}
+        <div className="ck-toolbar-sep" />
         <Button
           type="primary"
           icon={<PlayCircleOutlined />}
@@ -242,7 +254,7 @@ export default function SyncPage() {
             style={{ width: 220, marginBottom: 0 }}
           />
         )}
-      </Space>
+      </div>
 
       <PlanModal
         open={planOpen}

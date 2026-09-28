@@ -1,3 +1,29 @@
+/* ================= Design tokens ================= */
+:root {
+  --bg: #0d0f13;
+  --surface: #12151b;
+  --card: #171b23;
+  --card-hover: #1d222d;
+  --border: #2a3040;
+  --border-soft: #222835;
+  --text: #e7eaf1;
+  --text-2: #9aa3b4;
+  --text-3: #5f6879;
+  --accent: #5b8cff;
+  --accent-2: #8b5cf6;
+  --accent-soft: rgba(91, 140, 255, 0.13);
+  --green: #34d399;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --purple: #a78bfa;
+  --radius: 12px;
+  --radius-sm: 9px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {
@@ -6,26 +32,485 @@ body,
 }
 
 body {
-  background: #141414;
+  color: var(--text);
+  font-family:
+    'Segoe UI',
+    'PingFang SC',
+    'Microsoft YaHei UI',
+    'Microsoft YaHei',
+    system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
 
-.ck-drop-active {
-  outline: 2px dashed #1677ff;
-  outline-offset: -4px;
-  border-radius: 8px;
-}
-
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #444;
-  border-radius: 4px;
+  background: #2b3242;
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
-
+::-webkit-scrollbar-thumb:hover {
+  background: #3a4356;
+  background-clip: content-box;
+}
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+::selection {
+  background: rgba(91, 140, 255, 0.35);
+}
+
+/* ================= Shell ================= */
+.ck-shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(900px 420px at 82% -10%, rgba(91, 140, 255, 0.09), transparent 60%),
+    radial-gradient(700px 400px at -8% 112%, rgba(139, 92, 246, 0.06), transparent 60%),
+    var(--bg);
+}
+
+.ck-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.ck-main {
+  flex: 1;
+  min-width: 0;
+  padding: 18px 22px 22px;
+  overflow: auto;
+}
+
+/* ================= Title bar ================= */
+.ck-titlebar {
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 14px;
+  -webkit-app-region: drag;
+  user-select: none;
+  border-bottom: 1px solid var(--border-soft);
+  background: rgba(18, 21, 27, 0.55);
+}
+
+.ck-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ck-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(91, 140, 255, 0.4);
+}
+
+.ck-brand-name {
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.3px;
+}
+
+.ck-version {
+  font-size: 10.5px;
+  color: var(--text-3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-soft);
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.ck-win-controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.ck-win-btn {
+  width: 46px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.12s ease;
+  outline: none;
+}
+.ck-win-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+.ck-win-close:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+/* ================= Side nav ================= */
+.ck-sidenav {
+  width: 210px;
+  flex-shrink: 0;
+  padding: 14px 10px 12px;
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.013);
+}
+
+.ck-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13.5px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.ck-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+.ck-nav-item.is-active {
+  background: var(--accent-soft);
+  color: #a8c2ff;
+  font-weight: 600;
+}
+.ck-nav-icon {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.ck-sidenav-foot {
+  margin-top: auto;
+  padding: 10px 12px;
+  color: var(--text-3);
+  font-size: 11.5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ck-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 7px var(--green);
+  flex-shrink: 0;
+}
+.ck-status-dot.is-bad {
+  background: var(--red);
+  box-shadow: 0 0 7px var(--red);
+}
+
+/* ================= Page header ================= */
+.ck-pagehead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.ck-pagehead-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+.ck-pagehead-desc {
+  color: var(--text-2);
+  font-size: 12.5px;
+  margin-top: 5px;
+}
+.ck-pagehead-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ================= Panel ================= */
+.ck-panel {
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ck-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  flex-shrink: 0;
+}
+
+.ck-panel-title {
+  font-weight: 600;
+  font-size: 13.5px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ck-panel-body {
+  padding: 10px 12px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.ck-count {
+  background: var(--accent-soft);
+  color: #8fb0ff;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 8px;
+}
+
+/* ================= File cards ================= */
+.ck-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ck-file {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+.ck-file:hover {
+  background: var(--card-hover);
+  border-color: var(--border);
+}
+.ck-file.is-selected {
+  background: var(--accent-soft);
+  border-color: rgba(91, 140, 255, 0.55);
+}
+
+.ck-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ck-file-name {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ck-file-chips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.ck-file-meta {
+  color: var(--text-3);
+  font-size: 11.5px;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ck-thumb {
+  border-radius: 7px;
+  border: 1px solid var(--border-soft);
+  object-fit: cover;
+  background: #000;
+  flex-shrink: 0;
+}
+
+.ck-thumb-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 7px;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+/* ================= Chips ================= */
+.ck-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ck-chip-blue {
+  background: rgba(91, 140, 255, 0.14);
+  color: #8fb0ff;
+  border: 1px solid rgba(91, 140, 255, 0.26);
+}
+.ck-chip-purple {
+  background: rgba(167, 139, 250, 0.12);
+  color: #c6b4fd;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+}
+.ck-chip-warn {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.26);
+}
+
+/* ================= Toolbar ================= */
+.ck-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+}
+
+.ck-toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+}
+
+/* ================= Empty state ================= */
+.ck-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 42px 16px;
+  gap: 5px;
+  text-align: center;
+}
+.ck-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: var(--accent-soft);
+  color: #8fb0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.ck-empty-title {
+  color: var(--text-2);
+  font-size: 13px;
+}
+.ck-empty-hint {
+  color: var(--text-3);
+  font-size: 12px;
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+/* ================= Sync grid ================= */
+.ck-sync-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+/* ================= Drop state ================= */
+.ck-drop-active {
+  outline: 1.5px dashed rgba(91, 140, 255, 0.65);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
+
+/* ================= antd adjustments ================= */
+.ant-btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(91, 140, 255, 0.3);
+}
+.ant-btn-primary:not([disabled]):hover {
+  filter: brightness(1.12);
+}
+.ant-btn-primary[disabled] {
+  background: var(--card-hover) !important;
+  color: var(--text-3) !important;
+  box-shadow: none;
+}
+
+.ant-table-wrapper .ant-table {
+  background: transparent;
+}
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background: rgba(255, 255, 255, 0.025);
+  font-weight: 600;
+  color: var(--text-2);
+  font-size: 12px;
+}
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  border-color: var(--border-soft);
+}
+.ant-table-wrapper .ant-table-thead > tr > th {
+  border-color: var(--border-soft);
+}
+
+.ant-collapse {
+  background: var(--surface) !important;
+  border: 1px solid var(--border-soft) !important;
+}
+.ant-collapse > .ant-collapse-item {
+  border-color: var(--border-soft) !important;
+}
+
+.ant-descriptions {
+  --antd-table-border-color: var(--border-soft);
 }
