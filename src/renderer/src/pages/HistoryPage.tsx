@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { App, Button, Popconfirm, Table, Tag } from 'antd'
+import { CheckOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useTranslation } from 'react-i18next'
 import { formatLocal } from '@core/time-engine'
@@ -45,7 +46,7 @@ export default function HistoryPage() {
       title: 'backup',
       dataIndex: 'backupPath',
       width: 90,
-      render: (v?: string) => (v ? <Tag color="gold">✓</Tag> : <span style={{ color: '#5f6879' }}>—</span>)
+      render: (v?: string) => (v ? <Tag color="gold"><CheckOutlined /></Tag> : <span style={{ color: '#5f6879' }}>—</span>)
     },
     {
       title: 'error',

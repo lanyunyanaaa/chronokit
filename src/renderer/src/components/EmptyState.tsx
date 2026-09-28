@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { InboxIcon } from './icons'
 
 interface Props {
   icon?: ReactNode
@@ -6,7 +7,7 @@ interface Props {
   hint?: string
 }
 
-export default function EmptyState({ icon = '📦', title, hint }: Props) {
+export default function EmptyState({ icon = <InboxIcon />, title, hint }: Props) {
   return (
     <div className="ck-empty">
       <div className="ck-empty-icon">{icon}</div>

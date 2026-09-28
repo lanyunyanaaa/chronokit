@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
+import { LoadingOutlined } from '@ant-design/icons'
 import { ck } from '@renderer/services/ck'
 import { useAppStore, type Kind, type VideoItem } from '@renderer/store/appStore'
+import { FilmIcon } from './icons'
 
 interface Props {
   item: VideoItem
@@ -47,7 +49,7 @@ export default function Thumb({ item, kind, size = 64 }: Props) {
         flexShrink: 0
       }}
     >
-      {item.probing ? '…' : '🎬'}
+      {item.probing ? <LoadingOutlined spin style={{ fontSize: 14 }} /> : <FilmIcon size={16} />}
     </div>
   )
 }

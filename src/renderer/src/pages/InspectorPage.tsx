@@ -8,6 +8,7 @@ import type { MediaInfo } from '@shared/index'
 import { ck } from '@renderer/services/ck'
 import PageHeader from '@renderer/components/PageHeader'
 import EmptyState from '@renderer/components/EmptyState'
+import { SearchIcon } from '@renderer/components/icons'
 
 export default function InspectorPage() {
   const { t } = useTranslation()
@@ -75,7 +76,7 @@ export default function InspectorPage() {
       <Spin spinning={loading}>
         {!info ? (
           <div className="ck-panel">
-            <EmptyState icon="🔍" title={t('inspector.noFile')} hint={t('common.dropHint')} />
+            <EmptyState icon={<SearchIcon />} title={t('inspector.noFile')} hint={t('common.dropHint')} />
           </div>
         ) : (
           <div>

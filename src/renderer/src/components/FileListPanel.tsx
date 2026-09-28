@@ -7,6 +7,7 @@ import { useAppStore, type Kind, type VideoItem } from '@renderer/store/appStore
 import Thumb from './Thumb'
 import TimeBadges from './TimeBadges'
 import EmptyState from './EmptyState'
+import { FilmIcon } from './icons'
 
 interface Props {
   kind: Kind
@@ -119,7 +120,7 @@ export default function FileListPanel({ kind, title, selectedPaths, onSelectionC
       </div>
       <div className="ck-panel-body">
         {items.length === 0 ? (
-          <EmptyState icon="🎬" title={t('common.dropHint')} />
+          <EmptyState icon={<FilmIcon />} title={t('common.dropHint')} />
         ) : (
           <div className="ck-file-list">
             {items.map((item) => {
