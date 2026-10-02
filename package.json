@@ -1,6 +1,6 @@
 {
   "name": "chronokit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Open-source video timestamps & metadata toolbox",
   "main": "./out/main/index.js",
   "author": "ChronoKit contributors",
@@ -18,8 +18,10 @@
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "build": "electron-vite build",
-    "dist": "electron-vite build && electron-builder --win",
-    "dist:dir": "electron-vite build && electron-builder --dir"
+    "icons": "electron scripts/gen-icons.mjs",
+    "ffmpeg:fetch": "node scripts/fetch-ffmpeg.mjs",
+    "dist": "node scripts/fetch-ffmpeg.mjs && electron-vite build && electron-builder --win",
+    "dist:dir": "node scripts/fetch-ffmpeg.mjs && electron-vite build && electron-builder --dir"
   },
   "dependencies": {
     "@ant-design/icons": "^5.4.0",

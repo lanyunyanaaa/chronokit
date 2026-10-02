@@ -3,6 +3,11 @@ out/
 dist/
 release/
 .data/
+.data-packaged/
 .cache/
+resources/ffmpeg/
+dist.cmd
+smoke.cmd
+uninst.cmd
 *.log
 .DS_Store
