@@ -1,5 +1,5 @@
 import { app, BrowserWindow, shell } from 'electron'
-import { mkdirSync, writeFileSync } from 'fs'
+import { mkdirSync, writeFileSync, appendFileSync } from 'fs'
 import { join } from 'path'
 import { registerIpc } from './ipc'
 import { installThumbProtocol, registerThumbSchemePrivileges } from './protocol'
@@ -49,6 +49,10 @@ function createWindow(): BrowserWindow {
   })
 
   win.on('ready-to-show', () => win.show())
+  win.webContents.on('render-process-gone', (_e, details) => {
+    walkLog(`renderer gone: ${details.reason} ${details.exitCode}`)
+    console.log('[CK_SHOT] renderer gone:', details.reason, details.exitCode)
+  })
   sendWinState(win)
   // keep painting while unfocused (dev screenshot runs capture the live window)
   win.webContents.setBackgroundThrottling(false)
@@ -70,6 +74,15 @@ function createWindow(): BrowserWindow {
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
+/** CK_SHOT walk trace, straight to disk (stdout pipes are buffered). */
+function walkLog(msg: string): void {
+  try {
+    appendFileSync(join(process.env.CK_DATA_DIR ?? '.data', 'walk.log'), `${new Date().toISOString()} ${msg}\n`)
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
  * Dev tool: CK_SHOT=1 walks every page (empty state first, then with the
  * .data/samples fixtures loaded), captures each to .data/shots/ and exits.
@@ -87,7 +100,10 @@ async function runScreenshots(win: BrowserWindow): Promise<void> {
     join(samples, f)
   )
   const tools = [sources[0], targets[0], targets[1]]
-  // one metadata-less copy so the checkup page has something to report (R1)
+  // one metadata-less copy so the checkup page has something to report (R1).
+  // NOTE: photos (IMG_*.jpg with injected EXIF) stay in .data/samples for the
+  // U2a photo pipeline, but are not part of the walk — the shell thumbnail
+  // worker stalls the capture on first-generation thumbnails.
   const checkupFiles = [...sources, ...targets, join(samples, 'beach_trip_nometadata.mp4')]
   const table = [...sources, ...targets]
   const rename = [join(samples, 'beach_trip_nometadata.mp4'), ...sources]
@@ -101,11 +117,14 @@ async function runScreenshots(win: BrowserWindow): Promise<void> {
       return null
     })
   const shot = async (name: string): Promise<void> => {
+    walkLog(`shot ${name} begin`)
     const img = await win.webContents.capturePage()
     writeFileSync(join(shotDir, `${name}.png`), img.toPNG())
+    walkLog(`shot ${name} done`)
   }
   const go = async (page: string): Promise<void> => {
-    await js(`window.__ckNavigate('${page}')`)
+    const nav = await js(`window.__ckNavigate('${page}')`)
+    walkLog(`nav ${page} -> ${JSON.stringify(nav)}`)
     // wait until the nav and the rendered page agree — capturePage() can hand
     // back the previous compositor frame if we shoot too early
     for (let i = 0; i < 25; i++) {
@@ -113,6 +132,7 @@ async function runScreenshots(win: BrowserWindow): Promise<void> {
         `!!document.querySelector('.ck-nav-item.is-active[data-page="${page}"]') &&
          !!document.querySelector('.ck-pagehead-title')`
       )
+      if (i === 0) walkLog(`poll ${page} #0 -> ${JSON.stringify(ready)}`)
       if (ready === true) break
       await sleep(200)
     }
@@ -142,19 +162,23 @@ async function runScreenshots(win: BrowserWindow): Promise<void> {
 
     // 3) checkup: report with the R1 issue expanded so its file detail shows
     await go('checkup')
+    console.log('[CK_SHOT] step: checkup page ready')
     await js(
       `document.querySelector('.ck-issue-head')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))`
     )
     await sleep(400)
     await shot('checkup')
+    console.log('[CK_SHOT] step: checkup shot done')
 
     // 4) sync: pairing table with a source and a target picked by hand
     await go('sync')
+    walkLog('sync: selecting rows')
     await js(
       `const rows = document.querySelectorAll('.ck-file');
        rows[0]?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
        rows[2]?.dispatchEvent(new MouseEvent('click', { bubbles: true }))`
     )
+    walkLog('sync: rows selected')
     await sleep(400)
     await shot('sync')
 

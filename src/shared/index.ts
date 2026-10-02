@@ -4,6 +4,22 @@ export const SUPPORTED_VIDEO_EXTS = [
   '.mp4', '.mov', '.avi', '.mkv', '.flv', '.wmv', '.mpg', '.mpeg', '.m4v', '.webm', '.ts', '.3gp'
 ] as const
 
+/** Photo formats whose EXIF ChronoKit can read (U2a: read-only). */
+export const SUPPORTED_PHOTO_EXTS = ['.jpg', '.jpeg', '.png'] as const
+
+export const SUPPORTED_MEDIA_EXTS = [...SUPPORTED_VIDEO_EXTS, ...SUPPORTED_PHOTO_EXTS] as const
+
+export function isVideoPath(p: string): boolean {
+  const ext = p.slice(p.lastIndexOf('.')).toLowerCase()
+  return (SUPPORTED_VIDEO_EXTS as readonly string[]).includes(ext)
+}
+
+/** Photos: metadata writes are unsafe (no remux), filesystem times only. */
+export function isPhotoPath(p: string): boolean {
+  const ext = p.slice(p.lastIndexOf('.')).toLowerCase()
+  return (SUPPORTED_PHOTO_EXTS as readonly string[]).includes(ext)
+}
+
 export const DEFAULT_MATCH_THRESHOLD = 0.75
 
 export interface StreamInfo {

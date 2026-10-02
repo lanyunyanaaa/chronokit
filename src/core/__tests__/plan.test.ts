@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildEditsPlan } from '../plan'
+import { buildEditsPlan, buildToolPlan } from '../plan'
 
 describe('buildEditsPlan', () => {
   const isWin = false
@@ -55,5 +55,33 @@ describe('buildEditsPlan', () => {
     const r = buildEditsPlan([base], {}, isWin)
     expect(r.items).toHaveLength(0)
     expect(r.skipped).toHaveLength(0)
+  })
+})
+
+describe('buildToolPlan / buildEditsPlan photo guards', () => {
+  const photo = {
+    path: 'C:/v/IMG_0001.jpg',
+    name: 'IMG_0001.jpg',
+    creationTimeIso: '2023-01-01T04:00:00Z',
+    filenameTimeIso: '2023-01-01T04:00:00Z',
+    mtimeMs: new Date('2023-06-01T00:00:00Z').getTime(),
+    birthtimeMs: new Date('2023-06-01T00:00:00Z').getTime()
+  }
+
+  it('tool plans write only filesystem times for photos', () => {
+    const r = buildToolPlan([photo], { mode: 'filename' }, { metadata: true, mtime: true, ctime: true }, true)
+    expect(r.items).toHaveLength(1)
+    expect(r.items[0].apply.metadata).toBeUndefined()
+    expect(r.items[0].apply.mtimeMs).toBeDefined()
+  })
+
+  it('table edits drop the metadata column for photos', () => {
+    const r = buildEditsPlan(
+      [photo],
+      { 'C:/v/IMG_0001.jpg': { metadataMs: new Date('2023-02-02T00:00:00Z').getTime() } },
+      true
+    )
+    expect(r.items).toHaveLength(0)
+    expect(r.skipped[0].reason).toBe('NO_CHANGES')
   })
 })

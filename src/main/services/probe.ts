@@ -1,6 +1,8 @@
-import { statSync } from 'fs'
+import { statSync, promises as fsp } from 'fs'
 import type { MediaInfo, StreamInfo } from '@shared/index'
+import { isPhotoPath } from '@shared/index'
 import { parseFfprobeDate } from '@core/time-engine'
+import { readExifCreationTime } from '@core/exif'
 import { resolveFfmpeg, run } from './ffmpeg'
 
 function num(v: unknown): number | undefined {
@@ -17,7 +19,32 @@ function pickCreationTime(data: Record<string, any>): string | undefined {
   return anyStream?.tags.creation_time
 }
 
+/**
+ * Photos: read EXIF directly instead of ffprobe (which doesn't surface EXIF
+ * creation dates). Only the first 256 KB are read — EXIF lives in the header.
+ */
+async function probePhotoFile(path: string): Promise<MediaInfo> {
+  const fh = await fsp.open(path, 'r')
+  try {
+    const head = Buffer.alloc(262_144)
+    const { bytesRead } = await fh.read(head, 0, head.length, 0)
+    const ext = path.slice(path.lastIndexOf('.')).toLowerCase()
+    const exif = readExifCreationTime(head.buffer.slice(head.byteOffset, head.byteOffset + bytesRead), ext)
+    return {
+      path,
+      size: statSync(path).size,
+      formatName: ext === '.png' ? 'png' : 'jpeg',
+      creationTimeIso: exif?.isoUtc,
+      tags: exif?.tags ?? {},
+      streams: []
+    }
+  } finally {
+    await fh.close()
+  }
+}
+
 export async function probeFile(path: string): Promise<MediaInfo> {
+  if (isPhotoPath(path)) return probePhotoFile(path)
   const { ffprobe } = resolveFfmpeg()
   const r = await run(
     ffprobe,

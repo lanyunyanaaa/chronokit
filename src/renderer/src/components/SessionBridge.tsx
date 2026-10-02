@@ -23,6 +23,11 @@ export default function SessionBridge(): null {
   const persistRef = useRef<() => void>(() => {})
 
   useEffect(() => {
+    // screenshot automation: no session restore, no session writes
+    if (ck.isShotMode) {
+      restoredRef.current = true
+      return
+    }
     let cancelled = false
     void (async () => {
       let snap: SessionSnapshot | null = null
@@ -63,6 +68,7 @@ export default function SessionBridge(): null {
   }, [])
 
   useEffect(() => {
+    if (ck.isShotMode) return
     let timer: ReturnType<typeof setTimeout> | undefined
     const persist = (): void => {
       const { lists } = useMediaStore.getState()

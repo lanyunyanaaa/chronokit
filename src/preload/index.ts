@@ -14,6 +14,8 @@ import type {
 } from '../shared/index'
 
 const api = {
+  /** Screenshot-automation mode: the walk must not write sessions. */
+  isShotMode: process.env.CK_SHOT === '1',
   selectFiles: (): Promise<string[]> => ipcRenderer.invoke('dialog:select-files'),
   selectFolder: (): Promise<string | null> => ipcRenderer.invoke('dialog:select-folder'),
   resolvePaths: (paths: string[]): Promise<string[]> => ipcRenderer.invoke('fs:resolve-paths', paths),

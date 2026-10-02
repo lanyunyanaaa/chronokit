@@ -7,6 +7,7 @@ import type {
   PlanTimeSource,
   TimeSourceKind
 } from '../shared/index'
+import { isPhotoPath } from '../shared/index'
 import {
   formatLocal,
   isPlausibleDate,
@@ -49,7 +50,11 @@ function instantsEqual(a: number | null | undefined, b: number | null | undefine
 
 function applyFromInstant(instant: Date, opts: SyncOptions, isWin: boolean, path: string): ApplyItem {
   const apply: ApplyItem = { path }
-  if (opts.metadata) apply.metadata = { creation_time: toFfprobeCreationTime(instant) }
+  // photos have no container to remux — writing "metadata" via ffmpeg would
+  // corrupt them, so U2a only offers filesystem times for photos
+  if (opts.metadata && !isPhotoPath(path)) {
+    apply.metadata = { creation_time: toFfprobeCreationTime(instant) }
+  }
   if (opts.mtime) apply.mtimeMs = instant.getTime()
   if (opts.ctime && isWin) apply.ctimeIso = instant.toISOString()
   return apply
@@ -228,7 +233,8 @@ export function buildEditsPlan(
     const edit = edits[target.path]
     if (!edit) continue
     const apply: ApplyItem = { path: target.path }
-    if (edit.metadataMs != null) {
+    // photos: no container remux (would corrupt) — filesystem times only
+    if (edit.metadataMs != null && !isPhotoPath(target.path)) {
       apply.metadata = { creation_time: toFfprobeCreationTime(new Date(edit.metadataMs)) }
     }
     if (edit.mtimeMs != null) apply.mtimeMs = edit.mtimeMs

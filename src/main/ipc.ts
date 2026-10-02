@@ -12,10 +12,13 @@ import { deleteBackupFiles, listBackupGroups, restoreBackupFile } from './servic
 import { applyChanges, applyRenames, type RenameRequest } from './services/executor'
 import { loadJournal, undoOp } from './services/journal'
 
-const VIDEO_FILTER = {
-  name: 'Video',
-  extensions: ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'mpg', 'mpeg', 'm4v', 'webm', 'ts', '3gp']
-}
+const MEDIA_FILTERS = [
+  {
+    name: 'Video',
+    extensions: ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'mpg', 'mpeg', 'm4v', 'webm', 'ts', '3gp']
+  },
+  { name: 'Photos (EXIF)', extensions: ['jpg', 'jpeg', 'png'] }
+]
 
 export function registerIpc(): void {
   ipcMain.on('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize())
@@ -33,7 +36,7 @@ export function registerIpc(): void {
     const win = BrowserWindow.fromWebContents(e.sender)
     const r = await dialog.showOpenDialog(win!, {
       properties: ['openFile', 'multiSelections'],
-      filters: [VIDEO_FILTER]
+      filters: MEDIA_FILTERS
     })
     return r.canceled ? [] : r.filePaths
   })
@@ -68,6 +71,9 @@ export function registerIpc(): void {
       mtimeMs: number,
       durationSec?: number
     ): Promise<string | null> => {
+      // screenshot automation: skip the shell worker entirely so the walk is
+      // deterministic (rows render placeholders)
+      if (process.env.CK_SHOT) return Promise.resolve(null)
       // Windows: read the shell's own thumbnail cache instead of extracting.
       if (process.platform === 'win32') return getShellThumbUrl(path, size, mtimeMs)
       return getThumbDataUrl(path, durationSec)

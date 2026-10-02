@@ -1,7 +1,7 @@
 import { promises as fsp } from 'fs'
 import path from 'path'
 import type { FileStatInfo } from '@shared/index'
-import { SUPPORTED_VIDEO_EXTS } from '@shared/index'
+import { SUPPORTED_MEDIA_EXTS } from '@shared/index'
 
 export async function statFiles(paths: string[]): Promise<FileStatInfo[]> {
   const out: FileStatInfo[] = []
@@ -23,7 +23,7 @@ export async function statFiles(paths: string[]): Promise<FileStatInfo[]> {
   return out
 }
 
-const extSet = new Set(SUPPORTED_VIDEO_EXTS.map((e) => e.toLowerCase()))
+const extSet = new Set(SUPPORTED_MEDIA_EXTS.map((e) => e.toLowerCase()))
 
 /** Expand dropped/selected paths: directories are walked recursively. */
 export async function resolveMediaPaths(paths: string[], maxFiles = 5000): Promise<string[]> {
