@@ -14,6 +14,7 @@ import { PageOutlet } from './pages/registry'
 import TaskStatus from './components/TaskStatus'
 import TitleBar from './components/TitleBar'
 import SideNav from './components/SideNav'
+import SessionBridge from './components/SessionBridge'
 
 export default function App() {
   const { i18n } = useTranslation()
@@ -42,6 +43,7 @@ export default function App() {
             </main>
           </div>
           <TaskStatus />
+          <SessionBridge />
         </div>
       </AntdApp>
     </ConfigProvider>

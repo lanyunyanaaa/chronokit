@@ -6,7 +6,11 @@
     "sync": "把源视频的真实时间修复到目标视频：智能导入自动配对同名文件 → 预览 → 执行，全程可撤销",
     "tools": "没有源文件？直接设定、批量偏移，或从文件名解析时间",
     "inspector": "查看视频的完整元数据：容器、流与标签",
-    "history": "所有写入操作都会记录在案，可跨会话撤销"
+    "history": "所有写入操作都会记录在案，可跨会话撤销",
+    "checkup": "扫描文件夹，找出所有时间问题：元数据缺失、文件名冲突、转存特征、时区偏移——全部走既有的预览 → 执行 → 撤销流程修复",
+    "table": "把每个文件当一行，直接编辑任意时间单元格：排序找乱序，单格或整列修正，预览后应用、可撤销",
+    "rename": "把无意义的相机文件名变成时间戳：选模板、看从 → 到的对照预览，应用后照常可撤销",
+    "backups": "每次改写元数据前都会先做备份。按批次浏览备份、还原单个文件或清理空间。"
   },
   "status": {
     "ffmpegOk": "FFmpeg 就绪",
@@ -21,7 +25,11 @@
     "sync": "同步时间",
     "tools": "时间工具",
     "inspector": "检查器",
-    "history": "操作历史"
+    "history": "操作历史",
+    "checkup": "体检中心",
+    "table": "批量表格",
+    "rename": "智能重命名",
+    "backups": "备份中心"
   },
   "task": {
     "probe": "读取媒体信息",
@@ -175,16 +183,145 @@
       "set-time": "设定时间",
       "shift-time": "批量偏移",
       "from-filename": "文件名解析",
-      "metadata": "元数据"
+      "metadata": "元数据",
+      "rename": "重命名"
     },
     "undoOk": "撤销成功，文件已恢复",
     "undoFail": "撤销失败：{{msg}}",
-    "confirmUndo": "撤销这次操作？相关文件将恢复到操作前的状态。"
+    "confirmUndo": "撤销这次操作？相关文件将恢复到操作前的状态。",
+    "undoneTag": "已撤销"
   },
   "exec": {
     "labelSync": "同步时间",
     "labelSet": "设定时间",
     "labelShift": "批量偏移",
     "labelFilename": "从文件名写入时间"
+  },
+  "session": {
+    "restoredN": "已恢复上次会话（{{n}} 个文件）",
+    "gone": "上次会话的文件已不在本机，已跳过"
+  },
+  "checkup": {
+    "reportTitle": "体检报告",
+    "emptyTitle": "还没有扫描任何文件",
+    "emptyHint": "把文件夹拖到这里或点添加——ChronoKit 会读取每个媒体文件，按规则报告时间问题",
+    "allCleanTitle": "未发现问题（{{n}} 个文件）",
+    "allCleanHint": "所有文件都通过了 R1-R7 规则检查。下次导入后再来看看。",
+    "rescan": "重新检查失败文件",
+    "totalN": "{{n}} 个文件",
+    "errorsN": "{{n}} 个异常",
+    "warnsN": "{{n}} 个警告",
+    "infosN": "{{n}} 个提示",
+    "healthyN": "{{n}} 个健康",
+    "probingN": "读取中 {{n}}…",
+    "previewFix": "预览修复",
+    "fixAll": "全部修复",
+    "fixableHint": "可自动修复 {{n}} 条规则，涉及 {{files}} 个文件",
+    "noFixHint": "本批没有可自动修复的问题",
+    "execLabelBatch": "体检批量修复（{{n}} 条规则）",
+    "execLabel": {
+      "R1": "体检 R1：从文件名解析写入",
+      "R2": "体检 R2：以文件名时间为准",
+      "R3": "体检 R3：同步创建时间",
+      "R4": "体检 R4：以文件名时间重排相同时间戳",
+      "R5": "体检 R5：以文件名时间为准",
+      "R6": "体检 R6：按检测到的偏移平移",
+      "R7": "体检 R7"
+    },
+    "r1": {
+      "desc": "元数据 creation_time 缺失或为占位值"
+    },
+    "r2": {
+      "desc": "文件名时间与元数据时间冲突"
+    },
+    "r3": {
+      "desc": "NTFS 创建时间晚于修改时间（转存特征）"
+    },
+    "r4": {
+      "desc": "{{n}} 个文件共享同一元数据时间（{{time}}）"
+    },
+    "r5": {
+      "desc": "文件名时间有序但元数据时间乱序（{{n}} 个文件）"
+    },
+    "r6": {
+      "desc": "{{n}} 个文件存在一致的 {{offset}} 元数据偏移（疑似时区）"
+    },
+    "r7": {
+      "desc": "无法解析、0 字节或时长异常"
+    },
+    "detail": {
+      "missing": "缺失",
+      "probeFailed": "ffprobe 无法读取此文件",
+      "zeroBytes": "文件为空（0 字节）",
+      "badDuration": "时长异常"
+    }
+  },
+  "table": {
+    "title": "编辑表格",
+    "col": {
+      "name": "文件",
+      "duration": "时长",
+      "status": "状态"
+    },
+    "statusProbing": "读取中",
+    "statusFailed": "无法解析",
+    "editHint": "点击编辑此时间",
+    "batch": {
+      "target": "目标列",
+      "set": "设为固定值",
+      "shift": "批量偏移",
+      "copy": "列间复制",
+      "apply": "应用到行"
+    },
+    "markedN": "已标记 {{n}} 个文件的变更",
+    "dirtyN": "{{n}} 项未应用",
+    "clearEdits": "放弃所有未应用的编辑",
+    "planHint": "{{n}} 个文件有变更",
+    "apply": "预览变更",
+    "execLabel": "批量表格编辑"
+  },
+  "rename": {
+    "title": "重命名预览",
+    "pattern": "模板",
+    "prefix": "前缀",
+    "suffix": "后缀",
+    "conflictSkip": "冲突跳过",
+    "conflictSeq": "编号 -001",
+    "renamesN": "{{n}} 个重命名",
+    "from": "当前名称",
+    "to": "新名称",
+    "noRenames": "当前选择没有可重命名的文件——没有可用时间或名称已正确的文件会被跳过",
+    "hint": "时间来源：元数据 → 文件名 → 文件系统。主进程执行时会再次核对磁盘上的重名冲突。",
+    "apply": "重命名",
+    "confirmTitle": "应用重命名",
+    "undoHint": "重命名会记入操作历史，可完整撤销",
+    "execLabel": "智能重命名"
+  },
+  "backups": {
+    "refresh": "刷新",
+    "opsN": "{{n}} 个批次",
+    "filesN": "{{n}} 个备份文件",
+    "overQuota": "备份已超过 5 GB 建议上限——建议清理",
+    "cleanup": "清理 30 天前（{{n}} 个）",
+    "cleanupTitle": "删除 30 天前的备份？",
+    "col": {
+      "when": "时间",
+      "label": "批次",
+      "files": "文件数",
+      "size": "大小",
+      "original": "原始文件"
+    },
+    "backupGone": "备份已缺失",
+    "restoreOne": "还原",
+    "restoredOne": "已从备份还原该文件",
+    "undoOp": "撤销整批",
+    "deleteOp": "删除该批次的备份",
+    "deleteOpTitle": "删除该批次的全部备份？",
+    "deleteOneTitle": "删除此备份？",
+    "delete": "删除",
+    "deleteConfirmN": "将从磁盘删除 {{n}} 个备份文件。不会动原始文件。",
+    "deletedN": "已删除 {{n}} 个备份文件",
+    "emptyTitle": "还没有备份",
+    "emptyHint": "ChronoKit 每次改写文件元数据前都会自动生成备份，备份会出现在这里"
   }
 }

@@ -201,3 +201,70 @@ export function buildToolPlan(
 }
 
 export type { TimeSourceKind }
+
+/** Per-file manual edits from the batch editing table. */
+export interface FileEdits {
+  /** New container metadata creation_time. */
+  metadataMs?: number
+  /** New filesystem modified time. */
+  mtimeMs?: number
+  /** New NTFS creation time (Windows only). */
+  ctimeMs?: number
+}
+
+/**
+ * Build the dry-run plan for the batch editing table: each file carries its
+ * own set of edited field values (only touched fields are present).
+ */
+export function buildEditsPlan(
+  files: PlanFileFacts[],
+  edits: Record<string, FileEdits>,
+  isWin: boolean
+): BuildPlanResult {
+  const items: PlanItem[] = []
+  const skipped: PlanSkipped[] = []
+
+  for (const target of files) {
+    const edit = edits[target.path]
+    if (!edit) continue
+    const apply: ApplyItem = { path: target.path }
+    if (edit.metadataMs != null) {
+      apply.metadata = { creation_time: toFfprobeCreationTime(new Date(edit.metadataMs)) }
+    }
+    if (edit.mtimeMs != null) apply.mtimeMs = edit.mtimeMs
+    if (edit.ctimeMs != null && isWin) apply.ctimeIso = new Date(edit.ctimeMs).toISOString()
+
+    const changes: PlanFieldChange[] = []
+    if (apply.metadata) {
+      const cur = parseFfprobeDate(target.creationTimeIso ?? undefined)
+      if (!cur || !instantsEqual(cur.getTime(), edit.metadataMs!)) {
+        changes.push({
+          field: 'creation_time',
+          from: cur ? formatLocal(cur) : undefined,
+          to: formatLocal(new Date(edit.metadataMs!))
+        })
+      }
+    }
+    if (apply.mtimeMs != null && !instantsEqual(target.mtimeMs, apply.mtimeMs)) {
+      changes.push({
+        field: 'mtime',
+        from: formatLocal(new Date(target.mtimeMs)),
+        to: formatLocal(new Date(apply.mtimeMs))
+      })
+    }
+    if (apply.ctimeIso && isWin && !instantsEqual(target.birthtimeMs, edit.ctimeMs!)) {
+      changes.push({
+        field: 'ctime',
+        from: formatLocal(new Date(target.birthtimeMs)),
+        to: formatLocal(new Date(edit.ctimeMs!))
+      })
+    }
+
+    if (changes.length === 0) {
+      skipped.push({ path: target.path, name: target.name, reason: 'NO_CHANGES' })
+      continue
+    }
+    items.push({ path: target.path, name: target.name, timeSource: 'manual', apply, changes })
+  }
+  return { items, skipped }
+}

@@ -22,6 +22,8 @@ interface Props {
       editor's mode picker). */
   toolbar?: ReactNode
   extra?: ReactNode
+  /** Replace the media list entirely (e.g. the batch editing table). */
+  body?: ReactNode
 }
 
 function dirName(p: string): string {
@@ -40,7 +42,8 @@ export default function FileListPanel({
   onSelectionChange,
   fill,
   toolbar,
-  extra
+  extra,
+  body
 }: Props) {
   const { t } = useTranslation()
   const paths = useMediaStore((s) => s.lists[kind])
@@ -170,34 +173,38 @@ export default function FileListPanel({
         </div>
       </div>
       {toolbar && <div className="ck-panel-subbar">{toolbar}</div>}
-      <div className="ck-panel-body ck-panel-body--flush">
-        {count === 0 ? (
-          <EmptyState
-            icon={<FilmIcon size={22} />}
-            title={t('common.dropHint')}
-            hint={t('common.dropHintSub')}
-            dropActive={dragOver}
-            actions={
-              <>
-                <Button size="small" icon={<FileAddOutlined />} onClick={() => void addFromDialog('files')}>
-                  {t('common.addFiles')}
-                </Button>
-                <Button size="small" icon={<FolderAddOutlined />} onClick={() => void addFromDialog('folder')}>
-                  {t('common.addFolder')}
-                </Button>
-              </>
-            }
-          />
-        ) : (
-          <MediaList
-            paths={paths}
-            selectedPaths={selectedPaths}
-            onSelectionChange={onSelectionChange}
-            onRemove={removeOne}
-            fill={fill}
-          />
-        )}
-      </div>
+      {body !== undefined ? (
+        <div className="ck-panel-body ck-panel-body--flush ck-panel-body--table">{body}</div>
+      ) : (
+        <div className="ck-panel-body ck-panel-body--flush">
+          {count === 0 ? (
+            <EmptyState
+              icon={<FilmIcon size={22} />}
+              title={t('common.dropHint')}
+              hint={t('common.dropHintSub')}
+              dropActive={dragOver}
+              actions={
+                <>
+                  <Button size="small" icon={<FileAddOutlined />} onClick={() => void addFromDialog('files')}>
+                    {t('common.addFiles')}
+                  </Button>
+                  <Button size="small" icon={<FolderAddOutlined />} onClick={() => void addFromDialog('folder')}>
+                    {t('common.addFolder')}
+                  </Button>
+                </>
+              }
+            />
+          ) : (
+            <MediaList
+              paths={paths}
+              selectedPaths={selectedPaths}
+              onSelectionChange={onSelectionChange}
+              onRemove={removeOne}
+              fill={fill}
+            />
+          )}
+        </div>
+      )}
     </div>
   )
 }

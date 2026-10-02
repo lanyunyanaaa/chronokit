@@ -1303,3 +1303,211 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---- Checkup (体检中心) ---------------------------------------------- */
+
+.ck-checkup-list {
+  overflow-y: auto;
+  padding: var(--ck-sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ck-issue {
+  border: 1px solid var(--ck-border-soft);
+  border-radius: var(--ck-r-md);
+  background: var(--ck-card);
+  overflow: hidden;
+  transition: border-color var(--ck-t-fast) var(--ck-ease);
+}
+.ck-issue:hover {
+  border-color: var(--ck-border);
+}
+
+.ck-issue-main {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  padding: 10px 12px;
+  min-height: 46px;
+}
+
+.ck-issue-head {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: start;
+  color: inherit;
+  font: inherit;
+}
+
+.ck-sev-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ck-sev-dot.sev-error {
+  background: var(--ck-danger);
+  box-shadow: 0 0 0 3px rgba(var(--ck-danger-rgb, 255, 59, 48), 0.14);
+}
+.ck-sev-dot.sev-warn {
+  background: var(--ck-warning);
+  box-shadow: 0 0 0 3px rgba(var(--ck-warning-rgb, 255, 169, 0), 0.16);
+}
+.ck-sev-dot.sev-info {
+  background: var(--ck-accent);
+  box-shadow: 0 0 0 3px rgba(var(--ck-accent-rgb), 0.12);
+}
+
+.ck-issue-rule {
+  font-family: var(--ck-font-mono);
+  font-size: var(--ck-fs-xs);
+  color: var(--ck-text-3);
+  background: var(--ck-raised);
+  border-radius: var(--ck-r-pill);
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+.ck-issue-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--ck-fs-base);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ck-issue-caret {
+  color: var(--ck-text-3);
+  font-size: 10px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.ck-issue-files {
+  border-top: 1px solid var(--ck-border-soft);
+  background: var(--ck-bg);
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ck-issue-file {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-4);
+  padding: 6px 0;
+  min-height: 30px;
+  border-bottom: 1px dashed var(--ck-border-soft);
+}
+.ck-issue-file:last-child {
+  border-bottom: 0;
+}
+
+.ck-issue-name {
+  width: 40%;
+  min-width: 0;
+  font-size: var(--ck-fs-sm);
+  font-weight: 500;
+}
+
+.ck-issue-detail {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--ck-fs-sm);
+  color: var(--ck-text-3);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Batch editing table (批量表格) ---------------------------------- */
+
+.ck-table-holder {
+  height: 100%;
+  overflow: hidden;
+}
+.ck-table-holder .ant-table {
+  background: transparent;
+}
+.ck-table-holder .ant-table-thead > tr > th {
+  background: var(--ck-bg);
+  font-size: var(--ck-fs-xs);
+  color: var(--ck-text-3);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ck-cell-time {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--ck-r-sm);
+  padding: 2px 6px;
+  cursor: text;
+  color: var(--ck-text);
+  font: inherit;
+  font-size: var(--ck-fs-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: start;
+  transition: border-color var(--ck-t-fast) var(--ck-ease), background var(--ck-t-fast) var(--ck-ease);
+}
+.ck-cell-time:hover {
+  border-color: var(--ck-border);
+  background: var(--ck-raised);
+}
+.ck-cell-time.is-dirty {
+  border-color: var(--ck-accent-line);
+  background: var(--ck-accent-soft);
+  font-weight: 600;
+}
+
+.ck-row-dirty > td {
+  background: rgba(var(--ck-accent-rgb), 0.05) !important;
+}
+.ck-row-dirty-name {
+  color: var(--ck-accent);
+  font-weight: 600;
+}
+
+/* ---- Smart rename (智能重命名) --------------------------------------- */
+
+.ck-rename-list {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--ck-sp-3);
+}
+.ck-rename-list .ant-table {
+  background: transparent;
+}
+
+/* ---- Backup center (备份中心) ---------------------------------------- */
+
+.ck-backup-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  padding: 10px 14px;
+  background: var(--ck-card);
+  border: 1px solid var(--ck-border-soft);
+  border-radius: var(--ck-r-md);
+}
+
+.ck-backup-table {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--ck-sp-3);
+}
+.ck-backup-table .ant-table {
+  background: transparent;
+}

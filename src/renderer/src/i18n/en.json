@@ -6,7 +6,11 @@
     "sync": "Repair target videos with the true times of their sources: smart import pairs same-name files automatically → preview → execute, undoable",
     "tools": "No source files? Set, batch-shift, or parse times from filenames",
     "inspector": "Inspect full video metadata: container, streams and tags",
-    "history": "Every write is journaled and can be undone across sessions"
+    "history": "Every write is journaled and can be undone across sessions",
+    "checkup": "Scan a folder and find every timestamp problem: missing metadata, filename conflicts, copy-over signs, timezone offsets — all fixed through the usual preview → execute → undo flow",
+    "table": "See every file as a row and edit any time cell directly: sort to spot disorder, fix cells or whole columns, apply with preview and undo",
+    "rename": "Turn meaningless camera names into timestamps: pick a pattern, see the from → to preview, apply and undo like everything else",
+    "backups": "Every metadata write is backed up before it happens. Browse backups by batch, restore a single file, or free up space."
   },
   "status": {
     "ffmpegOk": "FFmpeg ready",
@@ -21,7 +25,11 @@
     "sync": "Sync times",
     "tools": "Time tools",
     "inspector": "Inspector",
-    "history": "History"
+    "history": "History",
+    "checkup": "Checkup",
+    "table": "Batch table",
+    "rename": "Smart rename",
+    "backups": "Backup center"
   },
   "task": {
     "probe": "Reading media",
@@ -175,16 +183,145 @@
       "set-time": "Set time",
       "shift-time": "Shift",
       "from-filename": "From filename",
-      "metadata": "Metadata"
+      "metadata": "Metadata",
+      "rename": "Rename"
     },
     "undoOk": "Undo succeeded, files restored",
     "undoFail": "Undo failed: {{msg}}",
-    "confirmUndo": "Undo this operation? All related files will be restored to their previous state."
+    "confirmUndo": "Undo this operation? All related files will be restored to their previous state.",
+    "undoneTag": "undone"
   },
   "exec": {
     "labelSync": "Sync times",
     "labelSet": "Set time",
     "labelShift": "Shift times",
     "labelFilename": "Apply filename times"
+  },
+  "session": {
+    "restoredN": "Restored last session ({{n}} files)",
+    "gone": "Files from the last session are gone — skipped"
+  },
+  "checkup": {
+    "reportTitle": "Report",
+    "emptyTitle": "Nothing scanned yet",
+    "emptyHint": "Drop a folder here or add files — ChronoKit reads every media file and reports timestamp problems by rule",
+    "allCleanTitle": "No problems found ({{n}} files)",
+    "allCleanHint": "Every file passed the R1-R7 rule set. Come back after the next import.",
+    "rescan": "Re-check failed files",
+    "totalN": "{{n}} files",
+    "errorsN": "{{n}} errors",
+    "warnsN": "{{n}} warnings",
+    "infosN": "{{n}} hints",
+    "healthyN": "{{n}} healthy",
+    "probingN": "Reading {{n}}…",
+    "previewFix": "Preview fix",
+    "fixAll": "Fix all",
+    "fixableHint": "{{n}} rule(s) can auto-fix {{files}} files",
+    "noFixHint": "Nothing to auto-fix in this batch",
+    "execLabelBatch": "Checkup batch fix ({{n}} rules)",
+    "execLabel": {
+      "R1": "Checkup R1: write time from filename",
+      "R2": "Checkup R2: trust filename over metadata",
+      "R3": "Checkup R3: sync creation time",
+      "R4": "Checkup R4: reorder identical stamps from filename",
+      "R5": "Checkup R5: trust filename over metadata",
+      "R6": "Checkup R6: shift by detected offset",
+      "R7": "Checkup R7"
+    },
+    "r1": {
+      "desc": "Metadata creation_time missing or a placeholder value"
+    },
+    "r2": {
+      "desc": "Filename time conflicts with metadata time"
+    },
+    "r3": {
+      "desc": "NTFS creation time is later than modified time (copy-over sign)"
+    },
+    "r4": {
+      "desc": "{{n}} files share one identical metadata time ({{time}})"
+    },
+    "r5": {
+      "desc": "Filename times are ordered but metadata times are scrambled ({{n}} files)"
+    },
+    "r6": {
+      "desc": "{{n}} files share a consistent {{offset}} metadata offset (likely timezone)"
+    },
+    "r7": {
+      "desc": "Unreadable, zero bytes or broken duration"
+    },
+    "detail": {
+      "missing": "missing",
+      "probeFailed": "ffprobe could not read this file",
+      "zeroBytes": "file is empty (0 bytes)",
+      "badDuration": "duration is broken"
+    }
+  },
+  "table": {
+    "title": "Editing table",
+    "col": {
+      "name": "File",
+      "duration": "Duration",
+      "status": "Status"
+    },
+    "statusProbing": "reading",
+    "statusFailed": "unreadable",
+    "editHint": "Click to edit this time",
+    "batch": {
+      "target": "Column",
+      "set": "Set value",
+      "shift": "Shift",
+      "copy": "Copy column",
+      "apply": "Apply to rows"
+    },
+    "markedN": "Marked {{n}} file(s) for change",
+    "dirtyN": "{{n}} unapplied",
+    "clearEdits": "Discard all unapplied edits",
+    "planHint": "{{n}} file(s) with changes",
+    "apply": "Preview changes",
+    "execLabel": "Batch table edit"
+  },
+  "rename": {
+    "title": "Rename preview",
+    "pattern": "Pattern",
+    "prefix": "Prefix",
+    "suffix": "Suffix",
+    "conflictSkip": "Skip conflicts",
+    "conflictSeq": "Number -001",
+    "renamesN": "{{n}} rename(s)",
+    "from": "Current name",
+    "to": "New name",
+    "noRenames": "No renames for this selection — files without any usable time or already-correct names are skipped",
+    "hint": "Time source: metadata → filename → file system. The main process re-checks name collisions on disk before renaming.",
+    "apply": "Rename",
+    "confirmTitle": "Apply renames",
+    "undoHint": "Renames are journaled and fully undoable in History",
+    "execLabel": "Smart rename"
+  },
+  "backups": {
+    "refresh": "Refresh",
+    "opsN": "{{n}} batch(es)",
+    "filesN": "{{n}} backup file(s)",
+    "overQuota": "Backups exceed the 5 GB guideline — consider cleaning up",
+    "cleanup": "Clean up older than 30 days ({{n}})",
+    "cleanupTitle": "Delete backups older than 30 days?",
+    "col": {
+      "when": "When",
+      "label": "Batch",
+      "files": "Files",
+      "size": "Size",
+      "original": "Original file"
+    },
+    "backupGone": "backup missing",
+    "restoreOne": "Restore",
+    "restoredOne": "File restored from backup",
+    "undoOp": "Undo batch",
+    "deleteOp": "Delete this batch's backups",
+    "deleteOpTitle": "Delete all backups of this batch?",
+    "deleteOneTitle": "Delete this backup?",
+    "delete": "Delete",
+    "deleteConfirmN": "{{n}} backup file(s) will be deleted from disk. The originals are NOT touched.",
+    "deletedN": "{{n}} backup file(s) deleted",
+    "emptyTitle": "No backups yet",
+    "emptyHint": "Backups appear here automatically whenever ChronoKit rewrites a file's metadata"
   }
 }

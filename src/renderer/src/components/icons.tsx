@@ -29,6 +29,27 @@ export function FilmIcon({ size }: IconProps) {
   )
 }
 
+/** Health-check pulse (clipboard with heartbeat line). */
+export function HealthIcon({ size }: IconProps) {
+  return (
+    <svg style={base(size)} viewBox="0 0 24 24" {...stroke}>
+      <rect x="4.5" y="3.5" width="15" height="17" rx="2.5" />
+      <path d="M9 3.5V2.6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v.9" />
+      <path d="M7.5 12h2.4l1.5-3 2.2 6 1.5-3h2.4" />
+    </svg>
+  )
+}
+
+/** Data grid (batch editing table). */
+export function TableIcon({ size }: IconProps) {
+  return (
+    <svg style={base(size)} viewBox="0 0 24 24" {...stroke}>
+      <rect x="3" y="4.5" width="18" height="15" rx="2" />
+      <path d="M3 9.5h18M3 14.5h18M9.5 9.5v10" />
+    </svg>
+  )
+}
+
 /** Magnifier icon. */
 export function SearchIcon({ size }: IconProps) {
   return (

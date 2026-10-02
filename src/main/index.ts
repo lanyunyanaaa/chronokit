@@ -5,6 +5,7 @@ import { registerIpc } from './ipc'
 import { installThumbProtocol, registerThumbSchemePrivileges } from './protocol'
 import { disposeShellThumbWorker } from './services/shellThumb'
 import { initDataRoot } from './services/paths'
+import { restoreWindowState, saveWindowState } from './services/window-state'
 
 // Keep all app data inside the repo during development
 if (!app.isPackaged && !process.env.CK_DATA_DIR) {
@@ -23,9 +24,12 @@ function sendWinState(win: BrowserWindow): void {
 }
 
 function createWindow(): BrowserWindow {
+  const restored = restoreWindowState()
   const win = new BrowserWindow({
-    width: 1440,
-    height: 900,
+    width: restored?.width ?? 1440,
+    height: restored?.height ?? 900,
+    x: restored?.x,
+    y: restored?.y,
     minWidth: 1120,
     minHeight: 700,
     show: false,
@@ -37,6 +41,11 @@ function createWindow(): BrowserWindow {
       contextIsolation: true,
       nodeIntegration: false
     }
+  })
+  if (restored?.maximized) win.maximize()
+
+  win.on('close', () => {
+    saveWindowState({ ...win.getNormalBounds(), maximized: win.isMaximized() })
   })
 
   win.on('ready-to-show', () => win.show())
@@ -71,16 +80,26 @@ async function runScreenshots(win: BrowserWindow): Promise<void> {
   await sleep(2500)
   const shotDir = join(process.env.CK_DATA_DIR ?? '.data', 'shots')
   mkdirSync(shotDir, { recursive: true })
-  const samples = join(app.getAppPath(), '.data', 'samples')
+  const samples =
+    process.env.CK_SAMPLES_DIR ?? join(app.getAppPath(), '.data', 'samples')
   const sources = ['VID_20230101_120305.mp4', 'beach_trip.mp4'].map((f) => join(samples, f))
   const targets = ['VID_20230101_120305_copy.mp4', 'beach_trip_converted.mp4'].map((f) =>
     join(samples, f)
   )
   const tools = [sources[0], targets[0], targets[1]]
-  const pages = ['sync', 'tools', 'inspector', 'history']
+  // one metadata-less copy so the checkup page has something to report (R1)
+  const checkupFiles = [...sources, ...targets, join(samples, 'beach_trip_nometadata.mp4')]
+  const table = [...sources, ...targets]
+  const rename = [join(samples, 'beach_trip_nometadata.mp4'), ...sources]
+  const pages = [
+    'checkup', 'sync', 'tools', 'table', 'rename', 'inspector', 'backups', 'history'
+  ]
 
   const js = (code: string): Promise<unknown> =>
-    win.webContents.executeJavaScript(code).catch(() => null)
+    win.webContents.executeJavaScript(code).catch((err) => {
+      console.log('[CK_SHOT] js error:', String(err))
+      return null
+    })
   const shot = async (name: string): Promise<void> => {
     const img = await win.webContents.capturePage()
     writeFileSync(join(shotDir, `${name}.png`), img.toPNG())
@@ -116,9 +135,20 @@ async function runScreenshots(win: BrowserWindow): Promise<void> {
     await js(`window.__store.media.getState().addPaths('sources', ${JSON.stringify(sources)})`)
     await js(`window.__store.media.getState().addPaths('targets', ${JSON.stringify(targets)})`)
     await js(`window.__store.media.getState().addPaths('tools', ${JSON.stringify(tools)})`)
+    await js(`window.__store.media.getState().addPaths('checkup', ${JSON.stringify(checkupFiles)})`)
+    await js(`window.__store.media.getState().addPaths('table', ${JSON.stringify(table)})`)
+    await js(`window.__store.media.getState().addPaths('rename', ${JSON.stringify(rename)})`)
     await sleep(9000)
 
-    // 3) sync: pairing table with a source and a target picked by hand
+    // 3) checkup: report with the R1 issue expanded so its file detail shows
+    await go('checkup')
+    await js(
+      `document.querySelector('.ck-issue-head')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))`
+    )
+    await sleep(400)
+    await shot('checkup')
+
+    // 4) sync: pairing table with a source and a target picked by hand
     await go('sync')
     await js(
       `const rows = document.querySelectorAll('.ck-file');
@@ -128,27 +158,40 @@ async function runScreenshots(win: BrowserWindow): Promise<void> {
     await sleep(400)
     await shot('sync')
 
-    // 4) tools: list + mode strip, one row selected so the scope hint shows
+    // 5) tools: list + mode strip, one row selected so the scope hint shows
     await go('tools')
     await selectFirstRow()
     await sleep(400)
     await shot('tools')
 
-    // 5) inspector: load the first fixture through the dev hook
+    // 6) batch table + rename preview (both render straight from the store)
+    await go('table')
+    await sleep(600)
+    await shot('table')
+    await go('rename')
+    await sleep(600)
+    await shot('rename')
+
+    // 7) inspector: load the first fixture through the dev hook
     await go('inspector')
     await js(`window.__ckInspect(${JSON.stringify(sources[0])})`)
     await sleep(1600)
     await shot('inspector')
 
-    // 6) dry-run preview, then really execute so the journal has a record
+    // 8) dry-run preview, then really execute so the journal has a record
     await go('sync')
     await js(`document.querySelector('.ck-actionbar .ant-btn-primary')?.click()`)
     await sleep(900)
     await shot('plan-modal')
     await js(`document.querySelector('.ant-modal-footer .ant-btn-primary')?.click()`)
     await sleep(5000)
+
+    // 9) safety pages after the execution so the journal/backup rows exist
     await go('history')
     await shot('history')
+    await go('backups')
+    await sleep(600)
+    await shot('backups')
 
     // leave the fixture files as we found them
     await js(

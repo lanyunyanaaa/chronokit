@@ -26,7 +26,7 @@ const SRC = 'C:\\media\\clip.mp4'
 const TGT = 'D:\\backup\\clip.mp4'
 
 function reset(): void {
-  useMediaStore.setState({ items: {}, lists: { sources: [], targets: [], tools: [] } })
+  useMediaStore.setState({ items: {}, lists: { sources: [], targets: [], tools: [], checkup: [], table: [], rename: [] } })
   useMatchStore.setState({ pairs: {}, threshold: 0.75 })
 }
 

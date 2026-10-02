@@ -3,7 +3,7 @@ import type { PageKey } from '@renderer/store/navStore'
 import { useNavStore } from '@renderer/store/navStore'
 import { useAppInfo } from '@renderer/hooks/useAppInfo'
 import type { ReactNode } from 'react'
-import { HistoryIcon, InspectorIcon, SyncIcon, ToolsIcon } from './icons'
+import { HistoryIcon, HealthIcon, InspectorIcon, ShieldIcon, SyncIcon, TableIcon, TagIcon, ToolsIcon } from './icons'
 
 interface NavEntry {
   key: PageKey
@@ -21,18 +21,26 @@ export default function SideNav() {
   const groups: { key: string; items: NavEntry[] }[] = [
     {
       key: 'discover',
-      items: [{ key: 'inspector', icon: <InspectorIcon size={18} />, label: t('menu.inspector') }]
+      items: [
+        { key: 'checkup', icon: <HealthIcon size={18} />, label: t('menu.checkup') },
+        { key: 'inspector', icon: <InspectorIcon size={18} />, label: t('menu.inspector') }
+      ]
     },
     {
       key: 'fix',
       items: [
         { key: 'sync', icon: <SyncIcon size={18} />, label: t('menu.sync') },
-        { key: 'tools', icon: <ToolsIcon size={18} />, label: t('menu.tools') }
+        { key: 'tools', icon: <ToolsIcon size={18} />, label: t('menu.tools') },
+        { key: 'table', icon: <TableIcon size={18} />, label: t('menu.table') },
+        { key: 'rename', icon: <TagIcon size={18} />, label: t('menu.rename') }
       ]
     },
     {
       key: 'safety',
-      items: [{ key: 'history', icon: <HistoryIcon size={18} />, label: t('menu.history') }]
+      items: [
+        { key: 'backups', icon: <ShieldIcon size={18} />, label: t('menu.backups') },
+        { key: 'history', icon: <HistoryIcon size={18} />, label: t('menu.history') }
+      ]
     }
   ]
 

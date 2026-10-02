@@ -23,6 +23,8 @@ interface MatchState {
   clearPairs: () => void
   /** Drop pairs whose target or source has left the media lists. */
   prunePairs: () => void
+  /** After renames: keep pairs pointing at the new paths. */
+  remapPaths: (pairs: { from: string; to: string }[]) => void
 }
 
 export const useMatchStore = create<MatchState>((set, get) => ({
@@ -53,6 +55,21 @@ export const useMatchStore = create<MatchState>((set, get) => ({
   },
 
   clearPairs: () => set({ pairs: {} }),
+
+  /** After renames: keep pairs pointing at the new paths. */
+  remapPaths: (pairs: { from: string; to: string }[]) => {
+    if (!pairs.length) return
+    const byFrom = new Map(pairs.map((p) => [p.from, p.to]))
+    set((s) => {
+      const next: Record<string, MatchPair> = {}
+      for (const [tp, pair] of Object.entries(s.pairs)) {
+        const newT = byFrom.get(tp) ?? tp
+        const newS = byFrom.get(pair.sourcePath) ?? pair.sourcePath
+        next[newT] = { ...pair, targetPath: newT, sourcePath: newS }
+      }
+      return { pairs: next }
+    })
+  },
 
   prunePairs: () => {
     const { lists } = useMediaStore.getState()

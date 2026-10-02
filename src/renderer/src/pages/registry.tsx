@@ -6,9 +6,13 @@ import type { PageKey } from '@renderer/store/navStore'
  * page; adding a U1 page means one entry here plus one in navStore's PageKey.
  */
 export const pageRegistry: Record<PageKey, LazyExoticComponent<ComponentType>> = {
+  checkup: lazy(() => import('./CheckupPage')),
   sync: lazy(() => import('./SyncPage')),
   tools: lazy(() => import('./TimeToolsPage')),
+  table: lazy(() => import('./BatchTablePage')),
+  rename: lazy(() => import('./RenamePage')),
   inspector: lazy(() => import('./InspectorPage')),
+  backups: lazy(() => import('./BackupCenterPage')),
   history: lazy(() => import('./HistoryPage'))
 }
 

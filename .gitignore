@@ -3,11 +3,13 @@ out/
 dist/
 release/
 .data/
+.data-e2e/
 .data-packaged/
 .cache/
 resources/ffmpeg/
 dist.cmd
 smoke.cmd
 uninst.cmd
+e2e-session.cmd
 *.log
 .DS_Store

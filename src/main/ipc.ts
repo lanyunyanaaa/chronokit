@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
-import type { AppInfo, ApplyItem, JournalOp, RecentDir } from '@shared/index'
+import type { AppInfo, ApplyItem, JournalOp, RecentDir, SessionSnapshot } from '@shared/index'
 import { resolveFfmpeg } from './services/ffmpeg'
 import { resolveMediaPaths, statFiles } from './services/files'
 import { getDataRoot } from './services/paths'
@@ -7,7 +7,9 @@ import { probeFiles } from './services/probe'
 import { getThumbDataUrl } from './services/thumbs'
 import { getShellThumbUrl } from './services/shellThumb'
 import { addRecentDir, listRecentDirs } from './services/recents'
-import { applyChanges } from './services/executor'
+import { loadSession, saveSession } from './services/session'
+import { deleteBackupFiles, listBackupGroups, restoreBackupFile } from './services/backups'
+import { applyChanges, applyRenames, type RenameRequest } from './services/executor'
 import { loadJournal, undoOp } from './services/journal'
 
 const VIDEO_FILTER = {
@@ -76,6 +78,20 @@ export function registerIpc(): void {
 
   ipcMain.handle('recents:add', (_e, dir: string): Promise<RecentDir[]> => addRecentDir(dir))
 
+  ipcMain.handle('session:load', async () => {
+    const snap = process.env.CK_SHOT ? null : await loadSession()
+    console.log(
+      '[session] load →',
+      snap
+        ? Object.entries(snap.lists)
+            .map(([k, v]) => `${k}:${v.length}`)
+            .join(' ') + ` page=${snap.activePage}`
+        : 'null'
+    )
+    return snap
+  })
+  ipcMain.handle('session:save', (_e, snapshot: SessionSnapshot) => saveSession(snapshot))
+
   ipcMain.handle('exec:apply', (e, payload: { items: ApplyItem[]; kind: JournalOp['kind']; label: string }) => {
     const sender = e.sender
     return applyChanges(payload.items, payload.kind, payload.label, (done, total, message) => {
@@ -83,9 +99,22 @@ export function registerIpc(): void {
     })
   })
 
+  ipcMain.handle('exec:rename', (e, payload: { items: RenameRequest[]; label: string }) => {
+    const sender = e.sender
+    return applyRenames(payload.items, payload.label, (done, total, message) => {
+      sender.send('task-progress', { task: 'exec', done, total, message })
+    })
+  })
+
   ipcMain.handle('journal:list', () => loadJournal())
 
   ipcMain.handle('journal:undo', (_e, id: string) => undoOp(id))
+
+  ipcMain.handle('backups:list', () => listBackupGroups())
+  ipcMain.handle('backups:restore', (_e, payload: { backupPath: string; path: string; mtimeMs: number }) =>
+    restoreBackupFile(payload.backupPath, payload.path, payload.mtimeMs)
+  )
+  ipcMain.handle('backups:delete', (_e, paths: string[]) => deleteBackupFiles(paths))
 
   ipcMain.handle('app:info', (): AppInfo => {
     let ffmpegPath: string | undefined

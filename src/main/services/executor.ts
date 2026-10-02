@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
-import { promises as fsp, statSync } from 'fs'
+import { promises as fsp, statSync, existsSync } from 'fs'
+import { basename, dirname, join } from 'path'
 import type { ApplyItem, ExecResult, JournalFileEntry, JournalOp } from '@shared/index'
 import { backupFile } from './backup'
 import { isWin, setTimes, setCreationTimes } from './fileTime'
@@ -113,5 +114,56 @@ export async function applyChanges(
 
   await appendOp({ ts: Date.now(), kind, label, status: 'done', entries })
 
+  return { okCount, failCount, errors }
+}
+
+export interface RenameRequest {
+  path: string
+  /** Target file NAME (not full path) in the same folder. */
+  to: string
+}
+
+/**
+ * Execute a batch of renames with journaling. Renames are inherently
+ * reversible (undo = rename back), so no content backup is made; timestamps
+ * survive the move untouched.
+ */
+export async function applyRenames(
+  items: RenameRequest[],
+  label: string,
+  onProgress: ProgressFn
+): Promise<ExecResult> {
+  const entries: JournalFileEntry[] = []
+  const errors: { path: string; message: string }[] = []
+  let okCount = 0
+  let failCount = 0
+
+  for (let i = 0; i < items.length; i++) {
+    const { path, to } = items[i]
+    onProgress(i, items.length, path)
+    const beforeStat = statSafe(path)
+    const target = join(dirname(path), to)
+    const entry: JournalFileEntry = {
+      path: target,
+      before: beforeStat ?? { mtimeMs: 0, atimeMs: 0, birthtimeMs: 0 },
+      after: {},
+      rename: { from: basename(path) }
+    }
+    try {
+      if (!beforeStat) throw new Error('file not found')
+      if (to !== basename(to)) throw new Error('target must be a file name')
+      if (existsSync(target)) throw new Error('target name already exists')
+      await fsp.rename(path, target)
+      okCount++
+    } catch (err: any) {
+      failCount++
+      entry.error = String(err?.message ?? err)
+      errors.push({ path, message: entry.error })
+    }
+    entries.push(entry)
+  }
+  onProgress(items.length, items.length)
+
+  await appendOp({ ts: Date.now(), kind: 'rename', label, status: 'done', entries })
   return { okCount, failCount, errors }
 }

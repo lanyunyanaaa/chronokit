@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import { promises as fsp } from 'fs'
+import { dirname, join } from 'path'
 import type { JournalOp } from '@shared/index'
 import { journalPath } from './paths'
 import { setTimes, setCreationTimes } from './fileTime'
@@ -51,6 +52,12 @@ export async function undoOp(id: string): Promise<UndoOutcome> {
 
   for (const e of [...op.entries].reverse()) {
     try {
+      if (e.rename) {
+        // undo a rename: move the file back to its original name; timestamps
+        // never changed, so there is nothing else to restore
+        await fsp.rename(e.path, join(dirname(e.path), e.rename.from))
+        continue
+      }
       if (e.backupPath) {
         await fsp.copyFile(e.backupPath, e.path)
       }

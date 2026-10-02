@@ -101,13 +101,15 @@ export interface JournalFileEntry {
   backupPath?: string
   before: { mtimeMs: number; atimeMs: number; birthtimeMs: number }
   after: { mtimeMs?: number; atimeMs?: number; birthtimeMs?: number }
+  /** Rename op: `path` is the NEW path; undo restores this original name. */
+  rename?: { from: string }
   error?: string
 }
 
 export interface JournalOp {
   id: string
   ts: number
-  kind: 'sync' | 'set-time' | 'shift-time' | 'from-filename' | 'metadata'
+  kind: 'sync' | 'set-time' | 'shift-time' | 'from-filename' | 'metadata' | 'rename'
   label: string
   status: 'done' | 'undone'
   entries: JournalFileEntry[]
@@ -128,9 +130,55 @@ export interface RecentDir {
   ts: number
 }
 
+/** Restorable workspace state persisted to session.json across launches. */
+export interface SessionSnapshot {
+  version: 1
+  savedAt: number
+  lists: {
+    sources: string[]
+    targets: string[]
+    tools: string[]
+    checkup: string[]
+    table: string[]
+    rename: string[]
+  }
+  /** Unapplied batch-table edits, keyed by absolute path. */
+  tableEdits: Record<string, FileEditsSnapshot>
+  activePage: string
+  threshold: number
+}
+
+export interface FileEditsSnapshot {
+  metadataMs?: number
+  mtimeMs?: number
+  ctimeMs?: number
+}
+
 export interface TaskProgress {
   task: string
   done: number
   total: number
   message?: string
+}
+
+/** One journaled backup file, as reported by the backup center. */
+export interface BackupFileRow {
+  path: string
+  backupPath: string
+  size: number
+  missing: boolean
+  /** Original mtime snapshot from the journal, for single-file restore. */
+  mtimeMs: number
+}
+
+/** Journal ops grouped with their on-disk backup footprint. */
+export interface BackupGroup {
+  opId: string
+  ts: number
+  kind: JournalOp['kind']
+  label: string
+  status: 'done' | 'undone'
+  files: BackupFileRow[]
+  totalSize: number
+  active: boolean
 }

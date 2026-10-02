@@ -3,11 +3,13 @@ import type { IpcRendererEvent } from 'electron'
 import type {
   AppInfo,
   ApplyItem,
+  BackupGroup,
   ExecResult,
   FileStatInfo,
   JournalOp,
   MediaInfo,
   RecentDir,
+  SessionSnapshot,
   TaskProgress
 } from '../shared/index'
 
@@ -26,14 +28,23 @@ const api = {
   ): Promise<string | null> => ipcRenderer.invoke('thumb:get', path, size, mtimeMs, durationSec),
   recentsList: (): Promise<RecentDir[]> => ipcRenderer.invoke('recents:list'),
   recentsAdd: (path: string): Promise<RecentDir[]> => ipcRenderer.invoke('recents:add', path),
+  sessionLoad: (): Promise<SessionSnapshot | null> => ipcRenderer.invoke('session:load'),
+  sessionSave: (snapshot: SessionSnapshot): Promise<void> =>
+    ipcRenderer.invoke('session:save', snapshot),
   applyChanges: (
     items: ApplyItem[],
     kind: JournalOp['kind'],
     label: string
   ): Promise<ExecResult> => ipcRenderer.invoke('exec:apply', { items, kind, label }),
+  applyRenames: (items: { path: string; to: string }[], label: string): Promise<ExecResult> =>
+    ipcRenderer.invoke('exec:rename', { items, label }),
   journalList: (): Promise<JournalOp[]> => ipcRenderer.invoke('journal:list'),
   journalUndo: (id: string): Promise<{ ok: boolean; message: string }> =>
     ipcRenderer.invoke('journal:undo', id),
+  backupsList: (): Promise<BackupGroup[]> => ipcRenderer.invoke('backups:list'),
+  backupsRestore: (backupPath: string, path: string, mtimeMs: number): Promise<void> =>
+    ipcRenderer.invoke('backups:restore', { backupPath, path, mtimeMs }),
+  backupsDelete: (paths: string[]): Promise<number> => ipcRenderer.invoke('backups:delete', paths),
   appInfo: (): Promise<AppInfo> => ipcRenderer.invoke('app:info'),
 
   /** Resolve the absolute path of a File dropped from the OS. */
