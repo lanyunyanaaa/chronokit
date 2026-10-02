@@ -33,6 +33,10 @@ export function thumbCacheDir(): string {
   return join(getDataRoot(), 'cache', 'thumbs')
 }
 
+export function shellThumbDir(): string {
+  return join(getDataRoot(), 'cache', 'shell-thumbs')
+}
+
 export function tmpDir(): string {
   return join(getDataRoot(), 'tmp')
 }

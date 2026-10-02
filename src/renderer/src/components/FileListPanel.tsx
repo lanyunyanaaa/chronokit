@@ -1,152 +1,201 @@
 import { useState, type ReactNode } from 'react'
-import { Button, Space } from 'antd'
-import { ClearOutlined, FileAddOutlined, FolderAddOutlined } from '@ant-design/icons'
+import { Button, Dropdown, Tooltip } from 'antd'
+import type { MenuProps } from 'antd'
+import { ClearOutlined, DownOutlined, FileAddOutlined, FolderAddOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import type { RecentDir } from '@shared/index'
 import { ck } from '@renderer/services/ck'
-import { useAppStore, type Kind, type VideoItem } from '@renderer/store/appStore'
-import Thumb from './Thumb'
-import TimeBadges from './TimeBadges'
+import { useMediaStore, type Kind } from '@renderer/store/mediaStore'
+import { useDropPaths } from '@renderer/hooks/useDropPaths'
+import MediaList from './MediaList'
 import EmptyState from './EmptyState'
-import { FilmIcon } from './icons'
+import { FilmIcon, RecentIcon, SelectAllIcon } from './icons'
 
 interface Props {
   kind: Kind
   title: string
   selectedPaths: string[]
   onSelectionChange: (paths: string[]) => void
+  /** Fill the remaining page height instead of a bounded scroll box. */
+  fill?: boolean
+  /** Config strip rendered between the panel head and the list (e.g. the batch
+      editor's mode picker). */
+  toolbar?: ReactNode
   extra?: ReactNode
 }
 
-export function formatSize(n: number): string {
-  let v = n
-  for (const u of ['B', 'KB', 'MB', 'GB']) {
-    if (v < 1024) return `${v.toFixed(u === 'B' || v >= 100 ? 0 : 1)} ${u}`
-    v /= 1024
-  }
-  return `${v.toFixed(1)} TB`
+function dirName(p: string): string {
+  return p.replace(/[\\/][^\\/]*$/, '') || p
 }
 
-export function formatDuration(sec?: number): string {
-  if (!sec || sec <= 0) return ''
-  const s = Math.round(sec)
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const r = s % 60
-  return h > 0
-    ? `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`
-    : `${m}:${String(r).padStart(2, '0')}`
+function baseName(p: string): string {
+  return p.split(/[\\/]/).filter(Boolean).pop() ?? p
 }
 
-export default function FileListPanel({ kind, title, selectedPaths, onSelectionChange, extra }: Props) {
+/** Panel with header actions + a virtualized, selectable media list. */
+export default function FileListPanel({
+  kind,
+  title,
+  selectedPaths,
+  onSelectionChange,
+  fill,
+  toolbar,
+  extra
+}: Props) {
   const { t } = useTranslation()
-  const items = useAppStore((s) =>
-    kind === 'sources' ? s.sources : kind === 'targets' ? s.targets : s.toolItems
-  )
-  const [dragOver, setDragOver] = useState(false)
+  const paths = useMediaStore((s) => s.lists[kind])
+  const count = paths.length
+  const [recents, setRecents] = useState<RecentDir[]>([])
+
+  const { dragOver, dragProps } = useDropPaths((dropped) => {
+    void useMediaStore.getState().addPaths(kind, dropped)
+  })
+
+  const refreshRecents = async (): Promise<void> => {
+    setRecents(await ck.recentsList().catch(() => []))
+  }
+
+  const addRecentFolder = async (dir: string): Promise<void> => {
+    setRecents(await ck.recentsAdd(dir).catch(() => []))
+    await useMediaStore.getState().addPaths(kind, [dir])
+  }
 
   const addFromDialog = async (type: 'files' | 'folder'): Promise<void> => {
     const raw = type === 'files' ? await ck.selectFiles() : await ck.selectFolder()
     if (!raw) return
-    const paths = Array.isArray(raw) ? raw : [raw]
-    if (!paths.length) return
-    await useAppStore.getState().addPaths(kind, paths)
-  }
-
-  const onDrop = async (e: React.DragEvent): Promise<void> => {
-    e.preventDefault()
-    setDragOver(false)
-    const paths = Array.from(e.dataTransfer.files)
-      .map((f) => window.ckApi.getPathForFile(f))
-      .filter(Boolean)
-    if (paths.length) await useAppStore.getState().addPaths(kind, paths)
-  }
-
-  const toggleSelect = (path: string): void => {
-    if (selectedPaths.includes(path)) {
-      onSelectionChange(selectedPaths.filter((p) => p !== path))
-    } else {
-      onSelectionChange([...selectedPaths, path])
-    }
+    const pathsIn = Array.isArray(raw) ? raw : [raw]
+    if (!pathsIn.length) return
+    // remember where imports come from so the next one is one click away
+    const dir = type === 'folder' ? pathsIn[0] : dirName(pathsIn[0])
+    if (dir) setRecents(await ck.recentsAdd(dir).catch(() => []))
+    await useMediaStore.getState().addPaths(kind, pathsIn)
   }
 
   const removeSelected = (): void => {
-    useAppStore.getState().removePaths(kind, selectedPaths)
+    useMediaStore.getState().removePaths(kind, selectedPaths)
     onSelectionChange([])
   }
 
+  const removeOne = (path: string): void => {
+    useMediaStore.getState().removePaths(kind, [path])
+    if (selectedPaths.includes(path)) onSelectionChange(selectedPaths.filter((p) => p !== path))
+  }
+
   const clear = (): void => {
-    useAppStore.getState().clearKind(kind)
+    useMediaStore.getState().clearKind(kind)
     onSelectionChange([])
+  }
+
+  const allSelected = count > 0 && selectedPaths.length === count
+  const toggleSelectAll = (): void => onSelectionChange(allSelected ? [] : [...paths])
+
+  const menuItems: MenuProps['items'] = [
+    ...(recents.length
+      ? ([
+          { key: '_recents', label: t('common.recent'), type: 'group' as const },
+          ...recents.map((r) => ({
+            key: `r:${r.path}`,
+            icon: <RecentIcon size={16} />,
+            label: (
+              <span className="ck-recent-item" title={r.path}>
+                <span className="ck-recent-name">{baseName(r.path)}</span>
+                <span className="ck-recent-path">{r.path}</span>
+              </span>
+            )
+          })),
+          { type: 'divider' as const }
+        ] as NonNullable<MenuProps['items']>)
+      : []),
+    { key: 'folder', icon: <FolderAddOutlined />, label: t('common.addFolder') }
+  ]
+
+  const onMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key.startsWith('r:')) void addRecentFolder(key.slice(2))
+    else if (key === 'folder') void addFromDialog('folder')
   }
 
   return (
     <div
-      className={`ck-panel ${dragOver ? 'ck-drop-active' : ''}`}
-      onDragOver={(e) => {
-        e.preventDefault()
-        setDragOver(true)
-      }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={(e) => {
-        void onDrop(e)
-      }}
+      className={`ck-panel ${fill ? 'ck-panel--fill' : ''} ${dragOver ? 'ck-drop-active' : ''}`}
+      {...dragProps}
     >
       <div className="ck-panel-head">
         <div className="ck-panel-title">
-          {title}
-          {items.length > 0 && <span className="ck-count">{items.length}</span>}
+          <span className="ck-truncate">{title}</span>
+          {count > 0 && <span className="ck-count">{count}</span>}
+          {selectedPaths.length > 0 && (
+            <span className="ck-chip ck-chip-blue">{t('common.selectedN', { n: selectedPaths.length })}</span>
+          )}
         </div>
-        <Space size={4} wrap>
+        <div className="ck-panel-actions">
           {extra}
-          <Button size="small" icon={<FileAddOutlined />} onClick={() => void addFromDialog('files')}>
-            {t('common.addFiles')}
-          </Button>
-          <Button size="small" icon={<FolderAddOutlined />} onClick={() => void addFromDialog('folder')}>
-            {t('common.addFolder')}
-          </Button>
+          {count > 0 && (
+            <Tooltip title={allSelected ? t('common.unselectAll') : t('common.selectAll')}>
+              <Button
+                size="small"
+                type="text"
+                aria-label={allSelected ? t('common.unselectAll') : t('common.selectAll')}
+                icon={<SelectAllIcon size={15} />}
+                onClick={toggleSelectAll}
+              />
+            </Tooltip>
+          )}
           {selectedPaths.length > 0 && (
             <Button size="small" onClick={removeSelected}>
-              {t('common.remove')}({selectedPaths.length})
+              {t('common.remove')} {selectedPaths.length}
             </Button>
           )}
-          <Button
+          <Tooltip title={t('common.clear')}>
+            <Button
+              size="small"
+              type="text"
+              aria-label={t('common.clear')}
+              icon={<ClearOutlined />}
+              disabled={!count}
+              onClick={clear}
+            />
+          </Tooltip>
+          <Dropdown.Button
             size="small"
-            type="text"
-            icon={<ClearOutlined />}
-            disabled={!items.length}
-            onClick={clear}
-          />
-        </Space>
+            trigger={['click']}
+            icon={<DownOutlined style={{ fontSize: 10 }} />}
+            onOpenChange={(open) => {
+              if (open) void refreshRecents()
+            }}
+            menu={{ items: menuItems, onClick: onMenuClick }}
+            onClick={() => void addFromDialog('files')}
+          >
+            {t('common.add')}
+          </Dropdown.Button>
+        </div>
       </div>
-      <div className="ck-panel-body">
-        {items.length === 0 ? (
-          <EmptyState icon={<FilmIcon />} title={t('common.dropHint')} />
+      {toolbar && <div className="ck-panel-subbar">{toolbar}</div>}
+      <div className="ck-panel-body ck-panel-body--flush">
+        {count === 0 ? (
+          <EmptyState
+            icon={<FilmIcon size={22} />}
+            title={t('common.dropHint')}
+            hint={t('common.dropHintSub')}
+            dropActive={dragOver}
+            actions={
+              <>
+                <Button size="small" icon={<FileAddOutlined />} onClick={() => void addFromDialog('files')}>
+                  {t('common.addFiles')}
+                </Button>
+                <Button size="small" icon={<FolderAddOutlined />} onClick={() => void addFromDialog('folder')}>
+                  {t('common.addFolder')}
+                </Button>
+              </>
+            }
+          />
         ) : (
-          <div className="ck-file-list">
-            {items.map((item) => {
-              const selected = selectedPaths.includes(item.path)
-              return (
-                <div
-                  key={item.path}
-                  className={`ck-file ${selected ? 'is-selected' : ''}`}
-                  title={item.path}
-                  onClick={() => toggleSelect(item.path)}
-                >
-                  <Thumb item={item} kind={kind} />
-                  <div className="ck-file-info">
-                    <div className="ck-file-name">{item.name}</div>
-                    <TimeBadges item={item} />
-                    <div className="ck-file-meta">
-                      {formatSize(item.size)}
-                      {item.durationSec ? ` · ${formatDuration(item.durationSec)}` : ''}
-                      {item.probing ? ` · ${t('common.loading')}` : ''}
-                      {item.probeFailed ? ' · !' : ''}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <MediaList
+            paths={paths}
+            selectedPaths={selectedPaths}
+            onSelectionChange={onSelectionChange}
+            onRemove={removeOne}
+            fill={fill}
+          />
         )}
       </div>
     </div>

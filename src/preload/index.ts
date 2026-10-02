@@ -7,6 +7,7 @@ import type {
   FileStatInfo,
   JournalOp,
   MediaInfo,
+  RecentDir,
   TaskProgress
 } from '../shared/index'
 
@@ -17,8 +18,14 @@ const api = {
   statFiles: (paths: string[]): Promise<FileStatInfo[]> => ipcRenderer.invoke('fs:stat-files', paths),
   probeFiles: (paths: string[]): Promise<(MediaInfo | null)[]> =>
     ipcRenderer.invoke('media:probe-files', paths),
-  getThumb: (path: string, durationSec?: number): Promise<string | null> =>
-    ipcRenderer.invoke('thumb:get', path, durationSec),
+  getThumb: (
+    path: string,
+    size: number,
+    mtimeMs: number,
+    durationSec?: number
+  ): Promise<string | null> => ipcRenderer.invoke('thumb:get', path, size, mtimeMs, durationSec),
+  recentsList: (): Promise<RecentDir[]> => ipcRenderer.invoke('recents:list'),
+  recentsAdd: (path: string): Promise<RecentDir[]> => ipcRenderer.invoke('recents:add', path),
   applyChanges: (
     items: ApplyItem[],
     kind: JournalOp['kind'],

@@ -1,47 +1,66 @@
-import { useEffect, useState } from 'react'
-import { ClockCircleOutlined, EyeOutlined, HistoryOutlined, SwapOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
-import { useAppStore } from '@renderer/store/appStore'
-import { ck } from '@renderer/services/ck'
+import type { PageKey } from '@renderer/store/navStore'
+import { useNavStore } from '@renderer/store/navStore'
+import { useAppInfo } from '@renderer/hooks/useAppInfo'
+import type { ReactNode } from 'react'
+import { HistoryIcon, InspectorIcon, SyncIcon, ToolsIcon } from './icons'
 
+interface NavEntry {
+  key: PageKey
+  icon: ReactNode
+  label: string
+}
+
+/** Nav rail, grouped by workflow stage: discover → fix → safety. */
 export default function SideNav() {
   const { t } = useTranslation()
-  const activePage = useAppStore((s) => s.activePage)
-  const setPage = useAppStore((s) => s.setPage)
-  const [ffmpegOk, setFfmpegOk] = useState<boolean | null>(null)
+  const activePage = useNavStore((s) => s.activePage)
+  const setPage = useNavStore((s) => s.setPage)
+  const info = useAppInfo()
 
-  useEffect(() => {
-    void ck
-      .appInfo()
-      .then((info) => setFfmpegOk(!info.ffmpegError))
-      .catch(() => setFfmpegOk(false))
-  }, [])
-
-  const items = [
-    { key: 'sync', icon: <SwapOutlined />, label: t('menu.sync') },
-    { key: 'tools', icon: <ClockCircleOutlined />, label: t('menu.tools') },
-    { key: 'inspector', icon: <EyeOutlined />, label: t('menu.inspector') },
-    { key: 'history', icon: <HistoryOutlined />, label: t('menu.history') }
+  const groups: { key: string; items: NavEntry[] }[] = [
+    {
+      key: 'discover',
+      items: [{ key: 'inspector', icon: <InspectorIcon size={18} />, label: t('menu.inspector') }]
+    },
+    {
+      key: 'fix',
+      items: [
+        { key: 'sync', icon: <SyncIcon size={18} />, label: t('menu.sync') },
+        { key: 'tools', icon: <ToolsIcon size={18} />, label: t('menu.tools') }
+      ]
+    },
+    {
+      key: 'safety',
+      items: [{ key: 'history', icon: <HistoryIcon size={18} />, label: t('menu.history') }]
+    }
   ]
+
+  const ffmpegBad = info ? !!info.ffmpegError : false
 
   return (
     <aside className="ck-sidenav">
       <nav>
-        {items.map((it) => (
-          <button
-            key={it.key}
-            data-page={it.key}
-            className={`ck-nav-item ${activePage === it.key ? 'is-active' : ''}`}
-            onClick={() => setPage(it.key)}
-          >
-            <span className="ck-nav-icon">{it.icon}</span>
-            <span>{it.label}</span>
-          </button>
+        {groups.map((g) => (
+          <div key={g.key}>
+            <div className="ck-nav-group">{t(`menu.group.${g.key}`)}</div>
+            {g.items.map((it) => (
+              <button
+                key={it.key}
+                data-page={it.key}
+                className={`ck-nav-item ${activePage === it.key ? 'is-active' : ''}`}
+                onClick={() => setPage(it.key)}
+              >
+                <span className="ck-nav-icon">{it.icon}</span>
+                <span>{it.label}</span>
+              </button>
+            ))}
+          </div>
         ))}
       </nav>
-      <div className="ck-sidenav-foot" title={t('status.ffmpeg')}>
-        <span className={`ck-status-dot ${ffmpegOk === false ? 'is-bad' : ''}`} />
-        <span>{ffmpegOk === false ? t('status.ffmpegBad') : t('status.ffmpegOk')}</span>
+      <div className="ck-nav-foot" title={info?.dataRoot ?? undefined}>
+        <span className={`ck-status-dot ${ffmpegBad ? 'is-bad' : ''}`} />
+        <span className="ck-truncate">{ffmpegBad ? t('status.ffmpegBad') : t('status.ffmpegOk')}</span>
       </div>
     </aside>
   )

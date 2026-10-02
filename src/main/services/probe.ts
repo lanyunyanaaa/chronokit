@@ -80,18 +80,30 @@ export async function probeFile(path: string): Promise<MediaInfo> {
   }
 }
 
+/** Bound the number of concurrent ffprobe processes; spawns are the cost. */
+const PROBE_CONCURRENCY = 6
+
 export async function probeFiles(
   paths: string[],
   onProgress?: (done: number, total: number) => void
 ): Promise<(MediaInfo | null)[]> {
-  const out: (MediaInfo | null)[] = []
-  for (let i = 0; i < paths.length; i++) {
-    try {
-      out.push(await probeFile(paths[i]))
-    } catch {
-      out.push(null)
+  const out: (MediaInfo | null)[] = new Array(paths.length).fill(null)
+  let done = 0
+  let next = 0
+  const worker = async (): Promise<void> => {
+    while (next < paths.length) {
+      const i = next++
+      try {
+        out[i] = await probeFile(paths[i])
+      } catch {
+        out[i] = null
+      }
+      done++
+      onProgress?.(done, paths.length)
     }
-    onProgress?.(i + 1, paths.length)
   }
+  await Promise.all(
+    Array.from({ length: Math.min(PROBE_CONCURRENCY, paths.length) }, () => worker())
+  )
   return out
 }

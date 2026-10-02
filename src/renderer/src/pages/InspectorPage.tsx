@@ -1,26 +1,38 @@
-import { useState } from 'react'
-import { App, Button, Collapse, Descriptions, Spin, Table, Tag } from 'antd'
+import { useEffect, useState } from 'react'
+import { App, Button, Collapse, Spin, Table } from 'antd'
 import { FileSearchOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
-import { formatDuration, formatSize } from '@renderer/components/FileListPanel'
+import { formatDuration, formatSize } from '@renderer/utils/format'
 import { formatLocal, parseFfprobeDate } from '@core/time-engine'
 import type { MediaInfo } from '@shared/index'
 import { ck } from '@renderer/services/ck'
-import PageHeader from '@renderer/components/PageHeader'
+import { useDropPaths } from '@renderer/hooks/useDropPaths'
+import PageShell from '@renderer/components/PageShell'
 import EmptyState from '@renderer/components/EmptyState'
 import { SearchIcon } from '@renderer/components/icons'
+
+function baseName(p: string): string {
+  return p.split(/[\\/]/).filter(Boolean).pop() ?? p
+}
+
+interface Cell {
+  key: string
+  label: string
+  value: React.ReactNode
+  wide?: boolean
+}
 
 export default function InspectorPage() {
   const { t } = useTranslation()
   const { message } = App.useApp()
   const [info, setInfo] = useState<MediaInfo | null>(null)
   const [loading, setLoading] = useState(false)
-  const [dragOver, setDragOver] = useState(false)
 
-  const load = async (p: string): Promise<void> => {
+  const load = async (paths: string[]): Promise<void> => {
+    if (!paths.length) return
     setLoading(true)
     try {
-      const res = await ck.probeFiles([p])
+      const res = await ck.probeFiles([paths[0]])
       const first = res[0]
       if (first) setInfo(first)
       else message.error(t('inspector.probeFailed'))
@@ -30,18 +42,18 @@ export default function InspectorPage() {
   }
 
   const pick = async (): Promise<void> => {
-    const files = await ck.selectFiles()
-    if (files.length) await load(files[0])
+    await load(await ck.selectFiles())
   }
 
-  const onDrop = async (e: React.DragEvent): Promise<void> => {
-    e.preventDefault()
-    setDragOver(false)
-    const paths = Array.from(e.dataTransfer.files)
-      .map((f) => window.ckApi.getPathForFile(f))
-      .filter(Boolean)
-    if (paths.length) await load(paths[0])
-  }
+  useEffect(() => {
+    // Dev-only automation hook (screenshot mode)
+    ;(window as any).__ckInspect = (p: string) => void load([p])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const { dragOver, dragProps } = useDropPaths((paths) => {
+    void load(paths)
+  })
 
   const copyJson = async (): Promise<void> => {
     if (!info) return
@@ -50,145 +62,191 @@ export default function InspectorPage() {
   }
 
   const creation = info?.creationTimeIso ? parseFfprobeDate(info.creationTimeIso) : null
+  const video = info?.streams.find((s) => s.type === 'video')
+  const audio = info?.streams.find((s) => s.type === 'audio')
+
+  const cells: Cell[] = info
+    ? [
+        { key: 'container', label: t('inspector.container'), value: info.formatName ?? '—' },
+        { key: 'size', label: t('inspector.size'), value: formatSize(info.size) },
+        {
+          key: 'duration',
+          label: t('inspector.duration'),
+          value: formatDuration(info.durationSec) || '—'
+        },
+        {
+          key: 'bitrate',
+          label: t('inspector.bitrate'),
+          value: info.bitrate ? `${Math.round(info.bitrate / 1000)} kbps` : '—'
+        },
+        {
+          key: 'res',
+          label: t('inspector.resolution'),
+          value: video?.width ? `${video.width}×${video.height}` : '—'
+        },
+        { key: 'fps', label: t('inspector.fps'), value: video?.fps ? String(video.fps) : '—' },
+        { key: 'vcodec', label: t('inspector.video'), value: video?.codec ?? '—' },
+        { key: 'acodec', label: t('inspector.audio'), value: audio?.codec ?? '—' },
+        {
+          key: 'creation',
+          label: t('time.creationTime'),
+          value: creation ? (
+            <span className="ck-time">{formatLocal(creation)}</span>
+          ) : (
+            <span className="ck-chip ck-chip-dash">{t('common.noTime')}</span>
+          )
+        },
+        {
+          key: 'path',
+          label: t('inspector.file'),
+          value: <span className="ck-mono">{info.path}</span>,
+          wide: true
+        }
+      ]
+    : []
 
   return (
-    <div
-      className={dragOver ? 'ck-drop-active' : undefined}
-      onDragOver={(e) => {
-        e.preventDefault()
-        setDragOver(true)
-      }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={(e) => {
-        void onDrop(e)
-      }}
+    <PageShell
+      title={t('menu.inspector')}
+      desc={t('desc.inspector')}
+      pageProps={{ ...dragProps, className: dragOver ? 'ck-drop-active' : undefined }}
+      actions={
+        <Button type="primary" icon={<FileSearchOutlined />} onClick={() => void pick()}>
+          {t('common.pickFile')}
+        </Button>
+      }
     >
-      <PageHeader
-        title={t('menu.inspector')}
-        desc={t('desc.inspector')}
-        actions={
-          <Button type="primary" icon={<FileSearchOutlined />} onClick={() => void pick()}>
-            {t('common.pickFile')}
-          </Button>
-        }
-      />
-
       <Spin spinning={loading}>
         {!info ? (
-          <div className="ck-panel">
-            <EmptyState icon={<SearchIcon />} title={t('inspector.noFile')} hint={t('common.dropHint')} />
+          <div className="ck-panel ck-panel--fill">
+            <EmptyState
+              icon={<SearchIcon size={22} />}
+              title={t('inspector.noFile')}
+              hint={t('common.dropHintSub')}
+              dropActive={dragOver}
+              actions={
+                <Button size="small" icon={<FileSearchOutlined />} onClick={() => void pick()}>
+                  {t('common.pickFile')}
+                </Button>
+              }
+            />
           </div>
         ) : (
-          <div>
+          <>
             <div className="ck-panel">
               <div className="ck-panel-head">
                 <div className="ck-panel-title">
-                  <span title={info.path}>{info.path}</span>
+                  <span className="ck-truncate" title={info.path}>
+                    {baseName(info.path)}
+                  </span>
+                  {info.formatName && <span className="ck-chip ck-chip-neutral">{info.formatName}</span>}
                 </div>
-                <Button size="small" onClick={() => void copyJson()}>
-                  {t('inspector.copyJson')}
-                </Button>
+                <div className="ck-panel-actions">
+                  <Button size="small" onClick={() => void copyJson()}>
+                    {t('inspector.copyJson')}
+                  </Button>
+                  <Button size="small" onClick={() => setInfo(null)}>
+                    {t('common.close')}
+                  </Button>
+                </div>
               </div>
               <div className="ck-panel-body">
-                <Descriptions
-                  size="small"
-                  bordered
-                  column={3}
-                  items={[
-                    { key: 'container', label: t('inspector.container'), children: info.formatName ?? '—' },
-                    { key: 'size', label: t('inspector.size'), children: formatSize(info.size) },
-                    {
-                      key: 'duration',
-                      label: t('inspector.duration'),
-                      children: formatDuration(info.durationSec) || '—'
-                    },
-                    {
-                      key: 'bitrate',
-                      label: t('inspector.bitrate'),
-                      children: info.bitrate ? `${Math.round(info.bitrate / 1000)} kbps` : '—'
-                    },
-                    {
-                      key: 'creation',
-                      label: t('time.creationTime'),
-                      span: 2,
-                      children: creation ? (
-                        <span>
-                          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatLocal(creation)}</span>
-                          <Tag color="blue" style={{ marginInlineStart: 10 }}>
-                            {t('time.metadata')}
-                          </Tag>
-                        </span>
-                      ) : (
-                        <Tag color="warning">--</Tag>
-                      )
-                    }
-                  ]}
-                />
+                <div className="ck-kv">
+                  {cells.map((c) => (
+                    <div key={c.key} className={`ck-kv-cell ${c.wide ? 'is-wide' : ''}`}>
+                      <div className="ck-kv-label">{c.label}</div>
+                      <div className="ck-kv-value">{c.value}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="ck-panel" style={{ marginTop: 12 }}>
+            <div className="ck-panel">
               <div className="ck-panel-head">
                 <div className="ck-panel-title">{t('inspector.streams')}</div>
+                <span className="ck-count">{info.streams.length}</span>
               </div>
               <div className="ck-panel-body">
                 <Collapse
+                  className="ck-collapse"
+                  defaultActiveKey={info.streams.map((s) => String(s.index))}
                   items={info.streams.map((s) => ({
                     key: String(s.index),
-                    label: `#${s.index} ${s.type} · ${s.codec ?? ''}${
-                      s.width ? ` · ${s.width}×${s.height}` : ''
-                    }${s.fps ? ` · ${s.fps} fps` : ''}`,
+                    label: (
+                      <span className="ck-stream-line">
+                        <span className="ck-chip ck-chip-neutral ck-mono">#{s.index}</span>
+                        <span className="ck-stream-head">
+                          {t(`inspector.${s.type}`, { defaultValue: s.type })}
+                        </span>
+                        {s.codec && <span className="ck-chip ck-chip-blue">{s.codec}</span>}
+                        {s.width ? (
+                          <span className="ck-chip ck-chip-neutral ck-mono">
+                            {s.width}×{s.height}
+                          </span>
+                        ) : null}
+                        {s.fps ? (
+                          <span className="ck-chip ck-chip-neutral ck-mono">{s.fps} fps</span>
+                        ) : null}
+                        {s.sampleRate ? (
+                          <span className="ck-chip ck-chip-neutral ck-mono">{s.sampleRate} Hz</span>
+                        ) : null}
+                        {s.channels ? (
+                          <span className="ck-chip ck-chip-neutral ck-mono">{s.channels} ch</span>
+                        ) : null}
+                      </span>
+                    ),
                     children: (
-                      <Descriptions
-                        size="small"
-                        bordered
-                        column={2}
-                        items={[
-                          { key: 'type', label: 'type', children: s.type },
-                          { key: 'codec', label: 'codec', children: s.codec ?? '—' },
-                          ...(s.width
-                            ? [{ key: 'res', label: 'resolution', children: `${s.width}×${s.height}` }]
-                            : []),
-                          ...(s.fps ? [{ key: 'fps', label: 'fps', children: String(s.fps) }] : []),
-                          ...(s.sampleRate
-                            ? [{ key: 'sr', label: 'sample rate', children: `${s.sampleRate} Hz` }]
-                            : []),
-                          ...(s.channels
-                            ? [{ key: 'ch', label: 'channels', children: String(s.channels) }]
-                            : []),
-                          ...(s.durationSec
-                            ? [{ key: 'dur', label: 'duration', children: formatDuration(s.durationSec) }]
-                            : [])
-                        ]}
-                      />
+                      <div className="ck-kv">
+                        {[
+                          { k: 'type', v: s.type },
+                          { k: 'codec', v: s.codec ?? '—' },
+                          ...(s.width ? [{ k: 'resolution', v: `${s.width}×${s.height}` }] : []),
+                          ...(s.fps ? [{ k: 'fps', v: String(s.fps) }] : []),
+                          ...(s.sampleRate ? [{ k: 'sample rate', v: `${s.sampleRate} Hz` }] : []),
+                          ...(s.channels ? [{ k: 'channels', v: String(s.channels) }] : []),
+                          ...(s.durationSec ? [{ k: 'duration', v: formatDuration(s.durationSec) }] : [])
+                        ].map((kv) => (
+                          <div key={kv.k} className="ck-kv-cell">
+                            <div className="ck-kv-label">{kv.k}</div>
+                            <div className="ck-kv-value ck-mono">{kv.v}</div>
+                          </div>
+                        ))}
+                      </div>
                     )
                   }))}
                 />
               </div>
             </div>
 
-            <div className="ck-panel" style={{ marginTop: 12 }}>
+            <div className="ck-panel">
               <div className="ck-panel-head">
                 <div className="ck-panel-title">{t('inspector.tags')}</div>
+                <span className="ck-count">{Object.keys(info.tags).length}</span>
               </div>
-              <div className="ck-panel-body">
+              <div className="ck-panel-body ck-panel-body--tight">
                 <Table
                   size="small"
                   rowKey={(r) => r.k}
                   dataSource={Object.entries(info.tags).map(([k, v]) => ({ k, v }))}
                   pagination={false}
-                  scroll={{ y: 240 }}
+                  scroll={{ y: 260 }}
                   columns={[
-                    { title: 'key', dataIndex: 'k', width: 280 },
-                    { title: 'value', dataIndex: 'v' }
+                    {
+                      title: 'key',
+                      dataIndex: 'k',
+                      width: 260,
+                      render: (v: string) => <span className="ck-mono">{v}</span>
+                    },
+                    { title: 'value', dataIndex: 'v', ellipsis: true }
                   ]}
                   locale={{ emptyText: '—' }}
                 />
               </div>
             </div>
-          </div>
+          </>
         )}
       </Spin>
-    </div>
+    </PageShell>
   )
 }

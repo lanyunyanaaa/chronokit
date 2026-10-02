@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { formatLocal, parseFfprobeDate } from '@core/time-engine'
-import type { VideoItem } from '@renderer/store/appStore'
+import type { VideoItem } from '@renderer/store/mediaStore'
+import { TagIcon, TextLinesIcon } from './icons'
 
-/** Chips: metadata creation_time (blue) and filename timestamp (purple). */
+/** Time chips on a media row: metadata creation_time (blue) and the time parsed
+    from the filename (purple); a dashed chip marks a missing metadata time. */
 export default function TimeBadges({ item }: { item: VideoItem }) {
   const { t } = useTranslation()
   const meta = item.creationTimeIso ? parseFfprobeDate(item.creationTimeIso) : null
@@ -12,21 +14,23 @@ export default function TimeBadges({ item }: { item: VideoItem }) {
     <span className="ck-file-chips">
       {meta ? (
         <span className="ck-chip ck-chip-blue" title={t('time.creationTime')}>
+          <TagIcon size={11} />
           {formatLocal(meta)}
         </span>
       ) : (
-        <span className="ck-chip ck-chip-warn" title={t('time.creationTime')}>
-          --:--:--
+        <span className="ck-chip ck-chip-dash" title={t('time.creationTime')}>
+          {t('common.noTime')}
         </span>
       )}
-      {fname ? (
+      {fname && (
         <span
           className="ck-chip ck-chip-purple"
           title={`${t('time.filename')}${item.filenamePattern ? ` · ${item.filenamePattern}` : ''}`}
         >
+          <TextLinesIcon size={11} />
           {formatLocal(fname)}
         </span>
-      ) : null}
+      )}
     </span>
   )
 }

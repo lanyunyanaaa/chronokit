@@ -3,7 +3,7 @@
     "subtitle": "Video timestamps & metadata toolbox"
   },
   "desc": {
-    "sync": "Repair target videos with the true times of their sources: match → preview → execute, undoable",
+    "sync": "Repair target videos with the true times of their sources: smart import pairs same-name files automatically → preview → execute, undoable",
     "tools": "No source files? Set, batch-shift, or parse times from filenames",
     "inspector": "Inspect full video metadata: container, streams and tags",
     "history": "Every write is journaled and can be undone across sessions"
@@ -13,26 +13,51 @@
     "ffmpegBad": "FFmpeg not found"
   },
   "menu": {
+    "group": {
+      "discover": "Discover",
+      "fix": "Fix",
+      "safety": "Safety"
+    },
     "sync": "Sync times",
     "tools": "Time tools",
     "inspector": "Inspector",
     "history": "History"
   },
+  "task": {
+    "probe": "Reading media",
+    "exec": "Writing times"
+  },
   "common": {
     "addFiles": "Add files",
     "addFolder": "Add folder",
+    "add": "Add",
+    "recent": "Recent folders",
     "clear": "Clear",
     "cancel": "Cancel",
     "close": "Close",
     "preview": "Preview changes",
     "execute": "Execute",
     "undo": "Undo",
+    "refresh": "Refresh",
+    "yes": "Yes",
     "noChanges": "Nothing to change",
+    "noTime": "no time",
     "loading": "loading…",
     "copy": "Copied to clipboard",
     "remove": "Remove",
-    "dropHint": "Drop video files / folders here, or use the buttons",
+    "selectedN": "{{n}} selected",
+    "selectAll": "Select all",
+    "unselectAll": "Clear selection",
+    "totalN": "{{n}} total",
+    "writeTargets": "Write",
+    "dropHint": "No files yet",
+    "dropHintSub": "Drop files or folders into this window, or use the buttons below",
     "pickFile": "Pick a file"
+  },
+  "opt": {
+    "metadata": "Metadata time",
+    "mtime": "Modified time",
+    "ctime": "Created time (NTFS)"
   },
   "time": {
     "source": "Source",
@@ -55,21 +80,34 @@
   "sync": {
     "sources": "Sources (correct times)",
     "targets": "Targets (to be fixed)",
+    "smartImport": "Smart import",
+    "smartPickFolder": "Pick a folder…",
+    "smartEmpty": "No supported video files in that folder",
+    "smartSummary": "Paired {{pairs}} same-name group(s); {{unpaired}} unpaired file(s) went to targets",
+    "ambiguousTitle": "Confirm the source for same-name files",
+    "ambiguousDesc": "Each group below contains multiple files with the same name. Pick which one is the source (the one with correct times); the rest become targets.",
+    "skipGroup": "Skip this group (add all to targets)",
+    "candidatesN": "{{n}} candidates",
+    "pairedN": "{{n}} paired",
     "autoMatch": "Auto match",
     "matchResult": "Matched pairs",
-    "tableEmpty": "Add target videos to see matching and the sync plan here",
+    "tableEmpty": "No target videos yet",
+    "tableEmptyHint": "Use Smart import to pair same-name files automatically, or add files to the two lists above",
+    "directionHint": "Left: the target's current time — right: the time that will be written",
     "threshold": "Threshold",
     "bindSelected": "Bind selected (source → target)",
     "bindHint": "Select 1 source and at least 1 target first",
     "unbind": "Unbind",
-    "method": "Match",
-    "score": "Score",
+    "method": "Source",
+    "score": "Method",
     "targetTime": "Target current time",
     "sourceTime": "Time to write",
     "unlinked": "unmatched",
-    "optMetadata": "Metadata creation_time",
-    "optMtime": "Modified time",
-    "optCtime": "Created time (NTFS)",
+    "planReady": "{{n}} file(s) will change",
+    "planNone": "Nothing to write yet",
+    "optMetadata": "Write creation_time into the container/streams",
+    "optMtime": "Write the filesystem modified time",
+    "optCtime": "Write the NTFS created time (Win32 SetFileTime)",
     "executed": "Done: {{ok}} succeeded, {{fail}} failed"
   },
   "plan": {
@@ -78,6 +116,10 @@
     "field": "Field",
     "from": "From",
     "to": "To",
+    "filesN": "{{n}} file(s)",
+    "changesN": "{{n}} change(s)",
+    "skippedN": "{{n}} skipped",
+    "safety": "Every file is backed up first and can be undone from History",
     "skipped": "{{n}} file(s) skipped or already consistent"
   },
   "tools": {
@@ -86,16 +128,18 @@
     "modeAbsolute": "Set time",
     "modeShift": "Shift",
     "modeFilename": "From filename",
-    "absoluteTime": "Target time",
+    "absoluteTime": "Pick a target time",
     "shiftHours": "hours",
     "shiftMinutes": "minutes",
     "quickPlus8": "+8h (timezone fix)",
     "quickMinus8": "-8h",
+    "scopeAll": "No selection — applies to all {{n}} file(s)",
+    "scopeSelected": "Applies to the {{n}} selected file(s)",
     "filenameHint": "Read the timestamp in each filename (e.g. VID_20230101_120305.mp4) and write it"
   },
   "inspector": {
     "title": "Metadata inspector",
-    "noFile": "Pick or drop a video file",
+    "noFile": "No file selected yet",
     "probeFailed": "Probe failed",
     "size": "Size",
     "streams": "Streams",
@@ -105,6 +149,10 @@
     "container": "Container",
     "duration": "Duration",
     "bitrate": "Bitrate",
+    "resolution": "Resolution",
+    "fps": "Frame rate",
+    "vcodec": "Video codec",
+    "acodec": "Audio codec",
     "video": "Video",
     "audio": "Audio"
   },
@@ -114,9 +162,21 @@
     "operation": "Operation",
     "files": "Files",
     "status": "Status",
+    "backup": "Backup",
+    "error": "Error",
     "done": "done",
     "undone": "undone",
     "empty": "No operations yet",
+    "emptyHint": "Run a sync or a batch edit and undoable records will show up here",
+    "footHint": "Every record keeps a backup of the original file — undo works after a restart",
+    "journalPath": "Journal & backups",
+    "kind": {
+      "sync": "Sync",
+      "set-time": "Set time",
+      "shift-time": "Shift",
+      "from-filename": "From filename",
+      "metadata": "Metadata"
+    },
     "undoOk": "Undo succeeded, files restored",
     "undoFail": "Undo failed: {{msg}}",
     "confirmUndo": "Undo this operation? All related files will be restored to their previous state."

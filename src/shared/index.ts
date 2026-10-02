@@ -123,6 +123,11 @@ export interface AppInfo {
   ffmpegError?: string
 }
 
+export interface RecentDir {
+  path: string
+  ts: number
+}
+
 export interface TaskProgress {
   task: string
   done: number

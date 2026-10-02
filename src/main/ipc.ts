@@ -1,10 +1,12 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
-import type { AppInfo, ApplyItem, JournalOp } from '@shared/index'
+import type { AppInfo, ApplyItem, JournalOp, RecentDir } from '@shared/index'
 import { resolveFfmpeg } from './services/ffmpeg'
 import { resolveMediaPaths, statFiles } from './services/files'
 import { getDataRoot } from './services/paths'
 import { probeFiles } from './services/probe'
 import { getThumbDataUrl } from './services/thumbs'
+import { getShellThumbUrl } from './services/shellThumb'
+import { addRecentDir, listRecentDirs } from './services/recents'
 import { applyChanges } from './services/executor'
 import { loadJournal, undoOp } from './services/journal'
 
@@ -55,9 +57,24 @@ export function registerIpc(): void {
     })
   })
 
-  ipcMain.handle('thumb:get', (_e, path: string, durationSec?: number) =>
-    getThumbDataUrl(path, durationSec)
+  ipcMain.handle(
+    'thumb:get',
+    (
+      _e,
+      path: string,
+      size: number,
+      mtimeMs: number,
+      durationSec?: number
+    ): Promise<string | null> => {
+      // Windows: read the shell's own thumbnail cache instead of extracting.
+      if (process.platform === 'win32') return getShellThumbUrl(path, size, mtimeMs)
+      return getThumbDataUrl(path, durationSec)
+    }
   )
+
+  ipcMain.handle('recents:list', (): Promise<RecentDir[]> => listRecentDirs())
+
+  ipcMain.handle('recents:add', (_e, dir: string): Promise<RecentDir[]> => addRecentDir(dir))
 
   ipcMain.handle('exec:apply', (e, payload: { items: ApplyItem[]; kind: JournalOp['kind']; label: string }) => {
     const sender = e.sender

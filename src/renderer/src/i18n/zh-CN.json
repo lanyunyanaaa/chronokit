@@ -3,7 +3,7 @@
     "subtitle": "视频时间与元数据工作台"
   },
   "desc": {
-    "sync": "把源视频的真实时间修复到目标视频：匹配 → 预览 → 执行，全程可撤销",
+    "sync": "把源视频的真实时间修复到目标视频：智能导入自动配对同名文件 → 预览 → 执行，全程可撤销",
     "tools": "没有源文件？直接设定、批量偏移，或从文件名解析时间",
     "inspector": "查看视频的完整元数据：容器、流与标签",
     "history": "所有写入操作都会记录在案，可跨会话撤销"
@@ -13,26 +13,51 @@
     "ffmpegBad": "未找到 FFmpeg"
   },
   "menu": {
+    "group": {
+      "discover": "发现",
+      "fix": "修复",
+      "safety": "安全"
+    },
     "sync": "同步时间",
     "tools": "时间工具",
     "inspector": "检查器",
     "history": "操作历史"
   },
+  "task": {
+    "probe": "读取媒体信息",
+    "exec": "写入时间"
+  },
   "common": {
     "addFiles": "添加文件",
     "addFolder": "添加文件夹",
+    "add": "添加",
+    "recent": "最近导入",
     "clear": "清空",
     "cancel": "取消",
     "close": "关闭",
     "preview": "预览变更",
     "execute": "执行",
     "undo": "撤销",
+    "refresh": "刷新",
+    "yes": "是",
     "noChanges": "没有需要变更的内容",
+    "noTime": "无时间",
     "loading": "读取中…",
     "copy": "已复制到剪贴板",
     "remove": "移除",
-    "dropHint": "拖入视频文件 / 文件夹，或点击右上角按钮添加",
+    "selectedN": "已选 {{n}}",
+    "selectAll": "全选",
+    "unselectAll": "取消全选",
+    "totalN": "共 {{n}} 条",
+    "writeTargets": "写入内容",
+    "dropHint": "还没有文件",
+    "dropHintSub": "把文件或文件夹拖进窗口，或点下方按钮添加",
     "pickFile": "选择文件"
+  },
+  "opt": {
+    "metadata": "元数据时间",
+    "mtime": "修改时间",
+    "ctime": "创建时间 (NTFS)"
   },
   "time": {
     "source": "来源",
@@ -55,21 +80,34 @@
   "sync": {
     "sources": "源视频（时间是正确的）",
     "targets": "目标视频（待修复）",
+    "smartImport": "智能导入",
+    "smartPickFolder": "选择文件夹…",
+    "smartEmpty": "该文件夹中没有支持的视频文件",
+    "smartSummary": "已配对 {{pairs}} 组同名文件；{{unpaired}} 个未配对文件已加入目标列表",
+    "ambiguousTitle": "确认同名文件的来源",
+    "ambiguousDesc": "以下每组文件都存在多个同名文件。请选择哪个是源（时间正确的文件），其余将作为目标。",
+    "skipGroup": "跳过此组（全部加入目标列表）",
+    "candidatesN": "{{n}} 个候选",
+    "pairedN": "已配对 {{n}}",
     "autoMatch": "自动匹配",
     "matchResult": "匹配结果",
-    "tableEmpty": "添加目标视频后，这里显示匹配与同步计划",
+    "tableEmpty": "还没有目标视频",
+    "tableEmptyHint": "用右上角「智能导入」自动配对同名文件，或手动往两个列表里添加文件",
+    "directionHint": "左侧是目标当前的时间，右侧是将要写入的时间",
     "threshold": "阈值",
     "bindSelected": "绑定选中（源 → 目标）",
     "bindHint": "请在源列表选择 1 个文件，在目标列表选择至少 1 个文件",
     "unbind": "解绑",
-    "method": "匹配",
-    "score": "得分",
+    "method": "匹配源",
+    "score": "匹配方式",
     "targetTime": "目标当前时间",
     "sourceTime": "将写入的时间",
     "unlinked": "未匹配",
-    "optMetadata": "元数据 creation_time",
-    "optMtime": "修改时间",
-    "optCtime": "创建时间 (NTFS)",
+    "planReady": "将变更 {{n}} 个文件",
+    "planNone": "暂无可写入的变更",
+    "optMetadata": "写入容器/流里的 creation_time",
+    "optMtime": "写入文件系统的修改时间",
+    "optCtime": "写入 NTFS 创建时间（Win32 SetFileTime）",
     "executed": "执行完成：成功 {{ok}}，失败 {{fail}}"
   },
   "plan": {
@@ -78,6 +116,10 @@
     "field": "项目",
     "from": "原值",
     "to": "新值",
+    "filesN": "{{n}} 个文件",
+    "changesN": "{{n}} 处变更",
+    "skippedN": "{{n}} 个跳过",
+    "safety": "执行前自动备份，可在操作历史中撤销",
     "skipped": "另有 {{n}} 个文件无需变更或被跳过"
   },
   "tools": {
@@ -86,16 +128,18 @@
     "modeAbsolute": "设定时间",
     "modeShift": "批量偏移",
     "modeFilename": "从文件名解析",
-    "absoluteTime": "目标时间",
+    "absoluteTime": "选择目标时间",
     "shiftHours": "小时",
     "shiftMinutes": "分钟",
     "quickPlus8": "+8 小时（时区修正）",
     "quickMinus8": "-8 小时",
+    "scopeAll": "未选择文件，将对全部 {{n}} 个文件生效",
+    "scopeSelected": "将对选中的 {{n}} 个文件生效",
     "filenameHint": "读取每个文件名中的时间戳（如 VID_20230101_120305.mp4）并写入"
   },
   "inspector": {
     "title": "元数据检查器",
-    "noFile": "选择或拖入一个视频文件",
+    "noFile": "还没有选择文件",
     "probeFailed": "探测失败",
     "size": "大小",
     "streams": "流信息",
@@ -105,6 +149,10 @@
     "container": "容器",
     "duration": "时长",
     "bitrate": "码率",
+    "resolution": "分辨率",
+    "fps": "帧率",
+    "vcodec": "视频编码",
+    "acodec": "音频编码",
     "video": "视频流",
     "audio": "音频流"
   },
@@ -114,9 +162,21 @@
     "operation": "操作",
     "files": "文件数",
     "status": "状态",
+    "backup": "备份",
+    "error": "错误",
     "done": "已执行",
     "undone": "已撤销",
-    "empty": "暂无操作记录",
+    "empty": "还没有操作记录",
+    "emptyHint": "执行一次同步或批量编辑后，这里会出现可撤销的记录",
+    "footHint": "每条记录都保留了原文件备份，重启应用后仍可撤销",
+    "journalPath": "日志与备份目录",
+    "kind": {
+      "sync": "同步时间",
+      "set-time": "设定时间",
+      "shift-time": "批量偏移",
+      "from-filename": "文件名解析",
+      "metadata": "元数据"
+    },
     "undoOk": "撤销成功，文件已恢复",
     "undoFail": "撤销失败：{{msg}}",
     "confirmUndo": "撤销这次操作？相关文件将恢复到操作前的状态。"

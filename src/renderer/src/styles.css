@@ -1,24 +1,16 @@
-/* ================= Design tokens ================= */
-:root {
-  --bg: #0d0f13;
-  --surface: #12151b;
-  --card: #171b23;
-  --card-hover: #1d222d;
-  --border: #2a3040;
-  --border-soft: #222835;
-  --text: #e7eaf1;
-  --text-2: #9aa3b4;
-  --text-3: #5f6879;
-  --accent: #5b8cff;
-  --accent-2: #8b5cf6;
-  --accent-soft: rgba(91, 140, 255, 0.13);
-  --green: #34d399;
-  --amber: #fbbf24;
-  --red: #f87171;
-  --purple: #a78bfa;
-  --radius: 12px;
-  --radius-sm: 9px;
-}
+/* ChronoKit design system.
+   Every color / radius / shadow / size lives in src/renderer/src/tokens.ts and
+   arrives here as a --ck-* custom property at bootstrap. Raw hex is forbidden
+   in this file; translucent fills use rgba(var(--ck-*-rgb), a).
+
+   Layout contract
+   ----------------
+   .ck-shell          fixed viewport column: titlebar / body / task pill
+   .ck-main           the only page scrollport; exposes --ck-pad-x
+   .ck-page           fills the scrollport, grows when content is taller
+   .ck-actionbar      full-bleed sticky bar pinned to the bottom of the scrollport
+   .ck-panel--fill    panel that absorbs the remaining page height (list pages)
+*/
 
 * {
   box-sizing: border-box;
@@ -32,49 +24,52 @@ body,
 }
 
 body {
-  color: var(--text);
-  font-family:
-    'Segoe UI',
-    'PingFang SC',
-    'Microsoft YaHei UI',
-    'Microsoft YaHei',
-    system-ui,
-    sans-serif;
+  color: var(--ck-text);
+  font-family: var(--ck-font);
+  font-size: var(--ck-fs-base);
+  line-height: var(--ck-lh-base);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   overflow: hidden;
 }
 
+::selection {
+  background: rgba(var(--ck-accent-rgb), 0.22);
+}
+
+:focus-visible {
+  outline: 2px solid rgba(var(--ck-accent-rgb), 0.7);
+  outline-offset: 1px;
+}
+
 ::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2b3242;
-  border-radius: 5px;
-  border: 2px solid transparent;
+  background: var(--ck-scrollbar);
+  border-radius: var(--ck-r-pill);
+  border: 3px solid transparent;
   background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a4356;
+  background: var(--ck-scrollbar-hover);
   background-clip: content-box;
 }
-::-webkit-scrollbar-track {
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-::selection {
-  background: rgba(91, 140, 255, 0.35);
-}
-
-/* ================= Shell ================= */
+/* ============================ shell ============================ */
 .ck-shell {
   height: 100vh;
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(900px 420px at 82% -10%, rgba(91, 140, 255, 0.09), transparent 60%),
-    radial-gradient(700px 400px at -8% 112%, rgba(139, 92, 246, 0.06), transparent 60%),
-    var(--bg);
+    radial-gradient(880px 420px at 88% -12%, rgba(var(--ck-accent-rgb), 0.055), transparent 62%),
+    radial-gradient(680px 400px at -10% 116%, rgba(var(--ck-accent-2-rgb), 0.04), transparent 62%),
+    var(--ck-bg);
 }
 
 .ck-body {
@@ -84,433 +79,1227 @@ body {
 }
 
 .ck-main {
+  --ck-pad-x: 20px;
   flex: 1;
   min-width: 0;
-  padding: 18px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px var(--ck-pad-x) 0;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 
-/* ================= Title bar ================= */
+/* ============================ title bar ============================ */
 .ck-titlebar {
-  height: 44px;
+  height: var(--ck-titlebar-h);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 14px;
+  padding-left: 13px;
   -webkit-app-region: drag;
   user-select: none;
-  border-bottom: 1px solid var(--border-soft);
-  background: rgba(18, 21, 27, 0.55);
+  border-bottom: 1px solid var(--ck-border-soft);
+  background: linear-gradient(180deg, rgba(var(--ck-surface-rgb), 0.92), rgba(var(--ck-surface-rgb), 0.62));
+  backdrop-filter: blur(12px);
 }
 
 .ck-brand {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--ck-sp-3);
 }
 
 .ck-logo {
-  width: 24px;
-  height: 24px;
+  width: 23px;
+  height: 23px;
   border-radius: 7px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--ck-accent), var(--ck-accent-2));
+  color: var(--ck-on-accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(91, 140, 255, 0.4);
+  box-shadow: var(--ck-sh-accent);
 }
 
 .ck-brand-name {
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: var(--ck-fs-base);
+  letter-spacing: 0.2px;
+}
+
+.ck-brand-sub {
+  color: var(--ck-text-3);
+  font-size: var(--ck-fs-sm);
+  padding-left: var(--ck-sp-4);
+  margin-left: var(--ck-sp-1);
+  border-left: 1px solid var(--ck-border);
   letter-spacing: 0.3px;
 }
 
+.ck-titlebar-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
 .ck-version {
-  font-size: 10.5px;
-  color: var(--text-3);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-soft);
+  font-size: var(--ck-fs-xs);
+  color: var(--ck-text-3);
+  background: rgba(var(--ck-text-rgb), 0.05);
+  border: 1px solid var(--ck-border-soft);
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--ck-r-pill);
+  margin-right: var(--ck-sp-4);
+  font-variant-numeric: tabular-nums;
 }
 
 .ck-win-controls {
   display: flex;
   height: 100%;
-  -webkit-app-region: no-drag;
 }
 
 .ck-win-btn {
-  width: 46px;
+  width: 44px;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  color: var(--text-2);
+  color: var(--ck-text-2);
   cursor: pointer;
-  transition: background 0.12s ease;
+  transition: background var(--ck-t-fast) var(--ck-ease), color var(--ck-t-fast) var(--ck-ease);
   outline: none;
 }
 .ck-win-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
+  background: rgba(var(--ck-text-rgb), 0.08);
+  color: var(--ck-text);
 }
 .ck-win-close:hover {
-  background: #e81123;
-  color: #fff;
+  background: var(--ck-win-close);
+  color: var(--ck-on-accent);
 }
 
-/* ================= Side nav ================= */
+/* ============================ side nav ============================ */
 .ck-sidenav {
-  width: 210px;
+  width: var(--ck-sidenav-w);
   flex-shrink: 0;
-  padding: 14px 10px 12px;
-  border-right: 1px solid var(--border-soft);
+  padding: var(--ck-sp-4) var(--ck-sp-3) var(--ck-sp-4);
+  border-right: 1px solid var(--ck-border-soft);
+  background: linear-gradient(180deg, rgba(var(--ck-surface-rgb), 0.72), rgba(var(--ck-surface-rgb), 0.4));
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  background: rgba(255, 255, 255, 0.013);
+  gap: 2px;
+}
+
+.ck-nav-group {
+  font-size: var(--ck-fs-xs);
+  font-weight: 600;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--ck-text-4);
+  padding: var(--ck-sp-5) var(--ck-sp-4) var(--ck-sp-2);
+  user-select: none;
+}
+.ck-nav-group:first-child {
+  padding-top: var(--ck-sp-2);
 }
 
 .ck-nav-item {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
+  gap: 10px;
+  height: 36px;
+  padding: 0 var(--ck-sp-4);
+  border-radius: var(--ck-r-md);
   border: none;
   background: transparent;
-  color: var(--text-2);
-  font-size: 13.5px;
+  color: var(--ck-text-2);
+  font-size: var(--ck-fs-base);
   font-family: inherit;
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
+  transition: background var(--ck-t-fast) var(--ck-ease), color var(--ck-t-fast) var(--ck-ease);
 }
 .ck-nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text);
+  background: rgba(var(--ck-text-rgb), 0.05);
+  color: var(--ck-text);
 }
 .ck-nav-item.is-active {
-  background: var(--accent-soft);
-  color: #a8c2ff;
+  background: var(--ck-accent-soft);
+  color: var(--ck-accent-text-strong);
   font-weight: 600;
 }
-.ck-nav-icon {
-  font-size: 15px;
-  display: flex;
-  align-items: center;
+/* active marker on the rail, aligned to the nav's outer padding */
+.ck-nav-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--ck-sp-3) - 1px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 18px;
+  border-radius: 0 2px 2px 0;
+  background: var(--ck-accent);
 }
 
-.ck-sidenav-foot {
-  margin-top: auto;
-  padding: 10px 12px;
-  color: var(--text-3);
-  font-size: 11.5px;
+.ck-nav-icon {
   display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  width: 18px;
+  color: currentColor;
+  opacity: 0.92;
+}
+
+.ck-nav-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  padding: var(--ck-sp-3) 10px;
+  border: 1px solid var(--ck-border-soft);
+  border-radius: var(--ck-r-md);
+  background: rgba(var(--ck-card-rgb), 0.7);
+  font-size: var(--ck-fs-sm);
+  color: var(--ck-text-2);
+  cursor: default;
 }
 
 .ck-status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 7px var(--green);
+  background: var(--ck-green);
+  box-shadow: 0 0 6px rgba(var(--ck-green-rgb), 0.45);
   flex-shrink: 0;
 }
 .ck-status-dot.is-bad {
-  background: var(--red);
-  box-shadow: 0 0 7px var(--red);
+  background: var(--ck-red);
+  box-shadow: 0 0 6px rgba(var(--ck-red-rgb), 0.45);
 }
 
-/* ================= Page header ================= */
+.ck-nav-foot-meta {
+  margin-left: auto;
+  color: var(--ck-text-4);
+  font-size: var(--ck-fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================ page scaffold ============================ */
+.ck-page {
+  flex: 1 0 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ck-sp-4);
+}
+
+/* Pages whose single panel should absorb the viewport (list workbenches):
+   the page never scrolls, the list inside scrolls. */
+.ck-page--fill {
+  flex: 1 1 0;
+}
+
 .ck-pagehead {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: var(--ck-sp-5);
+  padding-top: 2px;
 }
 .ck-pagehead-title {
-  font-size: 20px;
+  font-size: var(--ck-fs-hd);
   font-weight: 700;
   margin: 0;
-  letter-spacing: 0.2px;
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .ck-pagehead-desc {
-  color: var(--text-2);
-  font-size: 12.5px;
-  margin-top: 5px;
+  color: var(--ck-text-3);
+  font-size: var(--ck-fs-md);
+  margin-top: 3px;
+  max-width: 78ch;
 }
 .ck-pagehead-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--ck-sp-3);
   align-items: center;
   flex-shrink: 0;
 }
 
-/* ================= Panel ================= */
+/* ============================ panels ============================ */
 .ck-panel {
-  background: var(--card);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius);
+  background: var(--ck-card);
+  border: 1px solid var(--ck-border-soft);
+  border-radius: var(--ck-r-lg);
   display: flex;
   flex-direction: column;
   min-height: 0;
+  box-shadow: var(--ck-sh-sm);
+}
+
+/* absorbs the remaining page height — used by list-first pages */
+.ck-panel--fill {
+  flex: 1 1 0;
+  min-height: 200px;
 }
 
 .ck-panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 11px 14px;
-  border-bottom: 1px solid var(--border-soft);
+  gap: var(--ck-sp-4);
+  padding: 9px var(--ck-sp-4) 9px 14px;
+  border-bottom: 1px solid var(--ck-border-soft);
+  background: rgba(var(--ck-text-rgb), 0.016);
   flex-shrink: 0;
+  min-height: 46px;
 }
 
 .ck-panel-title {
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: var(--ck-fs-md);
   display: flex;
-  gap: 8px;
+  gap: var(--ck-sp-3);
   align-items: center;
+  letter-spacing: 0.2px;
+  min-width: 0;
+}
+
+.ck-panel-sub {
+  color: var(--ck-text-3);
+  font-size: var(--ck-fs-sm);
+  font-weight: 400;
 }
 
 .ck-panel-body {
-  padding: 10px 12px;
+  padding: var(--ck-sp-4);
   overflow: auto;
   flex: 1;
   min-height: 0;
 }
-
-.ck-count {
-  background: var(--accent-soft);
-  color: #8fb0ff;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 1px 8px;
-}
-
-/* ================= File cards ================= */
-.ck-file-list {
+/* list hosts: no padding, no outer scroll — the list scrolls itself */
+.ck-panel-body--flush {
+  padding: var(--ck-sp-3);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+}
+
+/* table hosts: the grid brings its own padding */
+.ck-panel-body--tight {
+  padding: var(--ck-sp-1) var(--ck-sp-3) var(--ck-sp-3);
+}
+
+/* config strip between a panel's head and its list */
+.ck-panel-subbar {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-4);
+  flex-wrap: wrap;
+  padding: 8px var(--ck-sp-4);
+  border-bottom: 1px solid var(--ck-border-soft);
+  background: rgba(var(--ck-surface-rgb), 0.45);
+  flex-shrink: 0;
+}
+.ck-panel-subbar-label {
+  color: var(--ck-text-4);
+  font-size: var(--ck-fs-xs);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ck-count {
+  background: rgba(var(--ck-accent-rgb), 0.15);
+  color: var(--ck-accent-text);
+  border: 1px solid rgba(var(--ck-accent-rgb), 0.22);
+  border-radius: var(--ck-r-pill);
+  font-size: var(--ck-fs-xs);
+  font-weight: 600;
+  padding: 0 7px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ck-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-2);
+  flex-shrink: 0;
+}
+
+/* ============================ action bar ============================ */
+/* Full-bleed sticky strip at the bottom of the page scrollport: preview /
+   execute stay reachable no matter how long the page grows. */
+.ck-actionbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 8;
+  /* keeps the bar on the window's bottom edge even when the page is short,
+     while sticky keeps it in view when the page is tall */
+  margin: auto calc(-1 * var(--ck-pad-x)) 0;
+  padding: 11px var(--ck-pad-x) 13px;
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-4);
+  flex-wrap: wrap;
+  border-top: 1px solid var(--ck-border-soft);
+  background: linear-gradient(
+    180deg,
+    rgba(var(--ck-bg-rgb), 0.72),
+    rgba(var(--ck-bg-rgb), 0.97) 45%
+  );
+  backdrop-filter: blur(14px);
+}
+.ck-actionbar-label {
+  color: var(--ck-text-3);
+  font-size: var(--ck-fs-sm);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.ck-actionbar-spacer {
+  flex: 1;
+}
+.ck-bar-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--ck-border);
+  flex-shrink: 0;
+}
+
+/* ============================ media list ============================ */
+.ck-media-scroll {
+  overflow: auto;
+  min-height: 0;
+  padding-right: 2px;
+}
+.ck-media-scroll.is-fill {
+  flex: 1;
+}
+
+.ck-media-spacer {
+  position: relative;
+  width: 100%;
+}
+
+.ck-media-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* Fixed row height keeps the virtualizer honest: 64px pitch = 56px card + 8px gap */
+.ck-media-row .ck-file {
+  height: 56px;
+  margin: 0 0 8px;
+  padding: 0 8px 0 10px;
+  overflow: hidden;
 }
 
 .ck-file {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
-  padding: 9px 10px;
-  border: 1px solid var(--border-soft);
-  border-radius: 10px;
-  background: var(--surface);
+  border: 1px solid var(--ck-border-soft);
+  border-radius: var(--ck-r-md);
+  background: var(--ck-raised);
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease;
+  user-select: none;
+  transition: background var(--ck-t-fast) var(--ck-ease), border-color var(--ck-t-fast) var(--ck-ease);
 }
 .ck-file:hover {
-  background: var(--card-hover);
-  border-color: var(--border);
+  background: var(--ck-hover);
+  border-color: var(--ck-border);
 }
 .ck-file.is-selected {
-  background: var(--accent-soft);
-  border-color: rgba(91, 140, 255, 0.55);
+  background: var(--ck-accent-soft);
+  border-color: var(--ck-accent-line);
+  /* playhead: a bar on the row's leading edge, like a timeline cursor */
+  box-shadow: inset 2.5px 0 0 0 var(--ck-accent);
+}
+.ck-file.is-selected:hover {
+  background: rgba(var(--ck-accent-rgb), 0.14);
 }
 
 .ck-file-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ck-file-top {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  min-width: 0;
 }
 
 .ck-file-name {
-  font-size: 13px;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--ck-fs-base);
   font-weight: 500;
+  line-height: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ck-file-bottom {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  min-width: 0;
+}
+
+.ck-file-meta {
+  color: var(--ck-text-3);
+  font-size: var(--ck-fs-sm);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .ck-file-chips {
   display: flex;
   gap: 5px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-
-.ck-file-meta {
-  color: var(--text-3);
-  font-size: 11.5px;
-  margin-top: 4px;
-  font-variant-numeric: tabular-nums;
-}
-
-.ck-thumb {
-  border-radius: 7px;
-  border: 1px solid var(--border-soft);
-  object-fit: cover;
-  background: #000;
+  margin-left: auto;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
-.ck-thumb-ph {
+/* per-row affordances: hidden at rest so the list stays quiet, revealed on
+   hover/focus. Kept in the layout to avoid a shift when it appears. */
+.ck-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--ck-t-fast) var(--ck-ease);
+}
+.ck-file:hover .ck-row-actions,
+.ck-file:focus-within .ck-row-actions {
+  opacity: 1;
+}
+
+.ck-icon-btn {
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-3);
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: 7px;
-  flex-shrink: 0;
-  font-size: 14px;
+  border: none;
+  border-radius: var(--ck-r-sm);
+  background: transparent;
+  color: var(--ck-text-3);
+  cursor: pointer;
+  transition: background var(--ck-t-fast) var(--ck-ease), color var(--ck-t-fast) var(--ck-ease);
+}
+.ck-icon-btn:hover {
+  background: rgba(var(--ck-text-rgb), 0.09);
+  color: var(--ck-text);
+}
+.ck-icon-btn.is-danger:hover {
+  background: rgba(var(--ck-red-rgb), 0.16);
+  color: var(--ck-red-text);
 }
 
-/* ================= Chips ================= */
+.ck-thumb {
+  position: relative;
+  border-radius: var(--ck-r-sm);
+  border: 1px solid var(--ck-border-soft);
+  background: var(--ck-thumb-bg);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ck-text-4);
+  overflow: hidden;
+}
+.ck-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ck-thumb.is-empty {
+  background: var(--ck-thumb-ph);
+}
+
+/* ============================ chips / tags ============================ */
 .ck-chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 20px;
-  padding: 0 8px;
-  border-radius: 6px;
-  font-size: 11px;
+  height: 19px;
+  padding: 0 7px;
+  border-radius: var(--ck-r-sm);
+  font-size: var(--ck-fs-xs);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  letter-spacing: 0.1px;
 }
+
 .ck-chip-blue {
-  background: rgba(91, 140, 255, 0.14);
-  color: #8fb0ff;
-  border: 1px solid rgba(91, 140, 255, 0.26);
+  background: rgba(var(--ck-accent-rgb), 0.11);
+  color: var(--ck-accent-text);
 }
 .ck-chip-purple {
-  background: rgba(167, 139, 250, 0.12);
-  color: #c6b4fd;
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  background: rgba(var(--ck-purple-rgb), 0.1);
+  color: var(--ck-purple-text);
 }
 .ck-chip-warn {
-  background: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.26);
+  background: rgba(var(--ck-amber-rgb), 0.12);
+  color: var(--ck-amber-text);
+}
+.ck-chip-green {
+  background: rgba(var(--ck-green-rgb), 0.11);
+  color: var(--ck-green-text);
+}
+.ck-chip-neutral {
+  background: rgba(var(--ck-text-rgb), 0.06);
+  color: var(--ck-text-2);
+}
+.ck-chip-red {
+  background: rgba(var(--ck-red-rgb), 0.1);
+  color: var(--ck-red-text);
+}
+/* muted variant: label-only, for "unset" states */
+.ck-chip-dash {
+  background: transparent;
+  color: var(--ck-text-4);
+  border: 1px dashed var(--ck-border);
 }
 
-/* ================= Toolbar ================= */
-.ck-toolbar {
+/* ============================ toggle group ============================ */
+.ck-toggles {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--ck-sp-2);
   flex-wrap: wrap;
-  padding: 12px 14px;
-  background: var(--card);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius);
+}
+.ck-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--ck-r-md);
+  border: 1px solid var(--ck-border-soft);
+  background: var(--ck-raised);
+  color: var(--ck-text-3);
+  font-family: inherit;
+  font-size: var(--ck-fs-md);
+  cursor: pointer;
+  transition: all var(--ck-t-fast) var(--ck-ease);
+}
+.ck-toggle:hover {
+  border-color: var(--ck-border);
+  color: var(--ck-text-2);
+}
+.ck-toggle.is-on {
+  background: rgba(var(--ck-accent-rgb), 0.14);
+  border-color: var(--ck-accent-line);
+  color: var(--ck-accent-text-strong);
+}
+.ck-toggle-mark {
+  display: flex;
+  width: 14px;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: rgba(var(--ck-text-rgb), 0.08);
+  color: var(--ck-text-4);
+}
+.ck-toggle.is-on .ck-toggle-mark {
+  background: var(--ck-accent);
+  color: var(--ck-on-accent);
 }
 
-.ck-toolbar-sep {
-  width: 1px;
-  height: 18px;
-  background: var(--border);
-}
-
-/* ================= Empty state ================= */
+/* ============================ empty state ============================ */
 .ck-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 42px 16px;
-  gap: 5px;
+  gap: var(--ck-sp-2);
+  padding: var(--ck-sp-7) var(--ck-sp-5);
   text-align: center;
+  flex: 1;
+  min-height: 150px;
 }
 .ck-empty-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 15px;
-  background: var(--accent-soft);
-  color: #8fb0ff;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(var(--ck-accent-rgb), 0.1);
+  border: 1px solid rgba(var(--ck-accent-rgb), 0.18);
+  color: var(--ck-accent-text);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  margin-bottom: 8px;
+  margin-bottom: var(--ck-sp-2);
 }
 .ck-empty-title {
-  color: var(--text-2);
-  font-size: 13px;
+  color: var(--ck-text-2);
+  font-size: var(--ck-fs-base);
+  font-weight: 500;
 }
 .ck-empty-hint {
-  color: var(--text-3);
-  font-size: 12px;
-  max-width: 320px;
-  line-height: 1.6;
+  color: var(--ck-text-4);
+  font-size: var(--ck-fs-md);
+  max-width: 44ch;
+  line-height: 1.55;
+}
+.ck-empty-actions {
+  display: flex;
+  gap: var(--ck-sp-3);
+  margin-top: var(--ck-sp-4);
+}
+.ck-empty.is-drop {
+  border: 1px dashed var(--ck-accent-line);
+  border-radius: var(--ck-r-lg);
+  background: rgba(var(--ck-accent-rgb), 0.05);
 }
 
-/* ================= Sync grid ================= */
+/* ============================ key/value grid ============================ */
+/* Separators are drawn by each cell (right+bottom shadow) instead of a grid
+   gap, so a partially filled last row shows card color rather than a grey
+   strip where empty tracks would be. */
+.ck-kv {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  background: var(--ck-card);
+  border: 1px solid var(--ck-border-soft);
+  border-radius: var(--ck-r-md);
+  overflow: hidden;
+}
+.ck-kv-cell {
+  background: var(--ck-card);
+  padding: 8px 11px;
+  min-width: 0;
+  box-shadow: 1px 1px 0 0 var(--ck-border-soft);
+}
+.ck-kv-cell.is-wide {
+  grid-column: 1 / -1;
+}
+.ck-kv-label {
+  color: var(--ck-text-4);
+  font-size: var(--ck-fs-xs);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.ck-kv-value {
+  color: var(--ck-text);
+  font-size: var(--ck-fs-md);
+  overflow-wrap: anywhere;
+}
+
+.ck-mono {
+  font-family: var(--ck-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--ck-fs-md);
+}
+
+/* ============================ streams ============================ */
+.ck-stream-line {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  flex-wrap: wrap;
+}
+.ck-stream-head {
+  font-size: var(--ck-fs-md);
+  font-weight: 600;
+}
+
+/* ============================ misc utilities ============================ */
+.ck-dim {
+  color: var(--ck-text-3);
+}
+.ck-faint {
+  color: var(--ck-text-4);
+}
+.ck-hint {
+  color: var(--ck-text-3);
+  font-size: var(--ck-fs-md);
+}
+.ck-warn-text {
+  color: var(--ck-amber-text);
+  font-size: var(--ck-fs-md);
+}
+/* Timecodes speak in the mono voice: every timestamp in the app — chips,
+   table cells, kv values — shares one data typeface with tabular digits. */
+.ck-time {
+  font-family: var(--ck-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.ck-file-chips .ck-chip,
+.ck-plan-arrow .ck-chip {
+  font-family: var(--ck-font-mono);
+}
+.ck-nowrap {
+  white-space: nowrap;
+}
+.ck-grow {
+  flex: 1;
+  min-width: 0;
+}
+.ck-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  flex-wrap: wrap;
+}
+.ck-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ck-sp-2);
+  min-width: 0;
+}
+.ck-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================ sync grid ============================ */
 .ck-sync-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  align-items: start;
+  gap: var(--ck-sp-4);
+  align-items: stretch;
 }
 
-/* ================= Drop state ================= */
+/* ============================ drop state ============================ */
+/* Dashed ring that follows any radius, on panels and whole pages alike. */
 .ck-drop-active {
-  outline: 1.5px dashed rgba(91, 140, 255, 0.65);
+  outline: 1.5px dashed var(--ck-accent-line);
   outline-offset: 3px;
-  border-radius: var(--radius);
 }
 
-/* ================= antd adjustments ================= */
-.ant-btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
+/* ============================ global task pill ============================ */
+.ck-taskpill {
+  position: fixed;
+  right: var(--ck-sp-6);
+  bottom: var(--ck-sp-5);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--ck-high);
+  border: 1px solid var(--ck-border);
+  border-radius: var(--ck-r-pill);
+  box-shadow: var(--ck-sh-lg);
+  animation: ck-rise var(--ck-t-base) var(--ck-ease);
+}
+.ck-taskpill-label {
+  font-size: var(--ck-fs-md);
+  color: var(--ck-text-2);
+  white-space: nowrap;
+}
+.ck-taskpill-count {
+  font-size: var(--ck-fs-sm);
+  color: var(--ck-text-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@keyframes ck-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ============================ recent folders menu ============================ */
+.ck-recent-item {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  min-width: 250px;
+  max-width: 360px;
+  padding: 1px 0;
+}
+.ck-recent-name {
+  color: var(--ck-text);
+  font-size: var(--ck-fs-md);
+  font-weight: 500;
+}
+.ck-recent-path {
+  color: var(--ck-text-4);
+  font-size: var(--ck-fs-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 330px;
+}
+
+/* ============================ smart-import tie-break modal ============================ */
+.ck-ambig-desc {
+  color: var(--ck-text-2);
+  font-size: var(--ck-fs-md);
+  margin-bottom: var(--ck-sp-4);
+  line-height: 1.6;
+}
+.ck-ambig-list {
+  max-height: 54vh;
+  overflow: auto;
+  padding-right: var(--ck-sp-1);
+}
+.ck-ambig-group {
+  border: 1px solid var(--ck-border-soft);
+  border-radius: var(--ck-r-md);
+  padding: var(--ck-sp-4);
+  margin-bottom: var(--ck-sp-3);
+  background: var(--ck-surface);
+}
+.ck-ambig-name {
+  font-weight: 600;
+  font-size: var(--ck-fs-md);
+  margin-bottom: var(--ck-sp-3);
+  color: var(--ck-text);
+}
+.ck-cand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  vertical-align: top;
+  max-width: 100%;
+}
+.ck-cand-name {
+  color: var(--ck-text);
+  font-variant-numeric: tabular-nums;
+}
+.ck-cand-dir {
+  color: var(--ck-text-4);
+  font-size: var(--ck-fs-xs);
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ck-cand-meta {
+  color: var(--ck-text-3);
+  font-size: var(--ck-fs-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ck-cand-radio {
+  display: flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: var(--ck-r-sm);
+  width: 100%;
+  margin-inline-start: 0;
+  transition: background var(--ck-t-fast) var(--ck-ease);
+}
+.ck-cand-radio:hover {
+  background: rgba(var(--ck-text-rgb), 0.04);
+}
+.ck-cand-radio.ant-radio-wrapper-checked {
+  background: var(--ck-accent-soft);
+}
+
+/* ============================ plan modal summary ============================ */
+.ck-plan-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--ck-sp-3);
+  padding: 9px 12px;
+  margin-bottom: var(--ck-sp-4);
+  border: 1px solid var(--ck-border-soft);
+  border-radius: var(--ck-r-md);
+  background: var(--ck-surface);
+  flex-wrap: wrap;
+}
+.ck-plan-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ck-text-3);
+}
+.ck-plan-arrow svg {
+  color: var(--ck-accent);
+  opacity: 0.85;
+}
+
+/* ============================ antd bridge ============================ */
+/* Buttons -------------------------------------------------------- */
+.ant-btn {
+  font-size: var(--ck-fs-md);
+}
+.ant-btn-sm {
+  height: 28px;
+  padding-inline: 10px;
+  font-size: var(--ck-fs-md);
+  border-radius: var(--ck-r-sm);
+}
+.ant-btn-default {
+  background: var(--ck-raised);
+}
+.ant-btn-default:not(:disabled):hover {
+  border-color: var(--ck-accent-line) !important;
+  color: var(--ck-text) !important;
+}
+.ant-btn-text:not(:disabled):hover,
+.ant-btn-text:not(:disabled):focus-visible {
+  background: rgba(var(--ck-text-rgb), 0.07);
+}
+
+/* Solid accent for primary buttons — the gradient lives only in the brand
+   mark; ghost primaries keep the antd outline look. */
+.ant-btn-primary:not(.ant-btn-background-ghost) {
+  background: var(--ck-accent) !important;
   border: none !important;
-  box-shadow: 0 2px 10px rgba(91, 140, 255, 0.3);
-}
-.ant-btn-primary:not([disabled]):hover {
-  filter: brightness(1.12);
-}
-.ant-btn-primary[disabled] {
-  background: var(--card-hover) !important;
-  color: var(--text-3) !important;
   box-shadow: none;
 }
+.ant-btn-primary:not(.ant-btn-background-ghost):not(:disabled):hover {
+  background: color-mix(in srgb, var(--ck-accent) 88%, white) !important;
+}
+.ant-btn-primary:not(.ant-btn-background-ghost):disabled {
+  background: var(--ck-raised) !important;
+  color: var(--ck-text-4) !important;
+  box-shadow: none;
+}
+.ant-btn-background-ghost.ant-btn-primary {
+  background: transparent !important;
+  box-shadow: none;
+}
+.ant-btn-background-ghost.ant-btn-primary:not(:disabled):hover {
+  background: var(--ck-accent-soft) !important;
+}
+/* split buttons (primary + caret) read as one control */
+.ant-dropdown-button .ant-btn:first-child:not(:last-child) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.ant-dropdown-button .ant-btn:last-child:not(:first-child) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
 
+/* Inputs --------------------------------------------------------- */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select .ant-select-selector,
+.ant-picker {
+  font-variant-numeric: tabular-nums;
+}
+.ant-input-sm,
+.ant-input-number-sm,
+.ant-select-sm .ant-select-selector,
+.ant-picker-small {
+  border-radius: var(--ck-r-sm) !important;
+}
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-picker {
+  background: var(--ck-card);
+}
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-number-focused,
+.ant-picker-focused {
+  box-shadow: 0 0 0 3px rgba(var(--ck-accent-rgb), 0.16) !important;
+}
+.ant-select-focused .ant-select-selector {
+  box-shadow: 0 0 0 3px rgba(var(--ck-accent-rgb), 0.16) !important;
+}
+.ant-input-number-group-addon {
+  background: var(--ck-high);
+  border-color: var(--ck-border);
+  color: var(--ck-text-3);
+  font-size: var(--ck-fs-sm);
+}
+
+/* Segmented ------------------------------------------------------ */
+.ant-segmented {
+  padding: 3px;
+  border-radius: var(--ck-r-md);
+  border: 1px solid var(--ck-border-soft);
+}
+.ant-segmented .ant-segmented-item {
+  border-radius: var(--ck-r-sm);
+  font-size: var(--ck-fs-md);
+  transition: color var(--ck-t-fast) var(--ck-ease);
+}
+.ant-segmented .ant-segmented-item-label {
+  padding: 0 12px;
+  line-height: 24px;
+  height: 24px;
+}
+
+/* Tables --------------------------------------------------------- */
 .ant-table-wrapper .ant-table {
   background: transparent;
+  font-size: var(--ck-fs-md);
 }
 .ant-table-wrapper .ant-table-thead > tr > th {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(var(--ck-text-rgb), 0.022);
   font-weight: 600;
-  color: var(--text-2);
-  font-size: 12px;
+  color: var(--ck-text-4);
+  font-size: var(--ck-fs-xs);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 7px 10px !important;
+  border-color: var(--ck-border-soft) !important;
 }
 .ant-table-wrapper .ant-table-tbody > tr > td {
-  border-color: var(--border-soft);
+  border-color: var(--ck-border-soft) !important;
+  vertical-align: middle;
+  padding: 7px 10px !important;
 }
-.ant-table-wrapper .ant-table-thead > tr > th {
-  border-color: var(--border-soft);
+.ant-table-wrapper .ant-table-tbody > tr:last-child > td {
+  border-bottom-color: transparent !important;
+}
+.ant-table-wrapper .ant-table-cell-fix-right,
+.ant-table-wrapper .ant-table-cell-fix-left {
+  background: var(--ck-card);
+}
+.ant-table-wrapper .ant-table-placeholder .ant-table-cell {
+  border-bottom: none !important;
+}
+.ant-table-wrapper .ant-table-placeholder:hover > td {
+  background: transparent !important;
+}
+.ant-table-wrapper .ant-pagination {
+  margin: var(--ck-sp-4) 0 var(--ck-sp-1) !important;
+}
+.ant-table-wrapper .ant-table-expanded-row > td {
+  background: var(--ck-surface) !important;
 }
 
-.ant-collapse {
-  background: var(--surface) !important;
-  border: 1px solid var(--border-soft) !important;
+/* Modal ---------------------------------------------------------- */
+.ant-modal .ant-modal-content {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--ck-border);
+  border-radius: var(--ck-r-xl);
 }
-.ant-collapse > .ant-collapse-item {
-  border-color: var(--border-soft) !important;
+.ant-modal .ant-modal-header {
+  padding: 15px var(--ck-sp-6) 13px;
+  margin: 0;
+  border-bottom: 1px solid var(--ck-border-soft);
+}
+.ant-modal .ant-modal-title {
+  font-size: var(--ck-fs-lg);
+  font-weight: 600;
+}
+.ant-modal .ant-modal-body {
+  padding: var(--ck-sp-5) var(--ck-sp-6);
+  max-height: 68vh;
+  overflow: auto;
+}
+.ant-modal .ant-modal-footer {
+  margin: 0;
+  padding: 12px var(--ck-sp-6);
+  border-top: 1px solid var(--ck-border-soft);
+  background: rgba(var(--ck-surface-rgb), 0.6);
+}
+.ant-modal .ant-modal-close {
+  top: 12px;
+  inset-inline-end: 12px;
+}
+.ant-modal-mask {
+  backdrop-filter: blur(3px);
 }
 
-.ant-descriptions {
-  --antd-table-border-color: var(--border-soft);
+/* Dropdown / menu ------------------------------------------------ */
+.ant-dropdown .ant-dropdown-menu {
+  padding: 5px;
+  border: 1px solid var(--ck-border);
+  border-radius: var(--ck-r-lg);
+  box-shadow: var(--ck-sh-lg);
+}
+.ant-dropdown .ant-dropdown-menu-item,
+.ant-dropdown .ant-dropdown-menu-submenu-title {
+  border-radius: var(--ck-r-sm);
+  padding: 6px 9px;
+  font-size: var(--ck-fs-md);
+  min-height: 30px;
+}
+.ant-dropdown .ant-dropdown-menu-item-group-title {
+  font-size: var(--ck-fs-xs);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ck-text-4);
+  padding: 6px 9px 4px;
+}
+.ant-dropdown .ant-dropdown-menu-item-divider {
+  background: var(--ck-border-soft);
+  margin: 4px 2px;
+}
+
+/* Tooltip / popover --------------------------------------------- */
+.ant-tooltip .ant-tooltip-inner {
+  border-radius: var(--ck-r-md);
+  font-size: var(--ck-fs-sm);
+  padding: 5px 9px;
+  border: 1px solid var(--ck-border);
+  box-shadow: var(--ck-sh-md);
+}
+.ant-popover .ant-popover-inner {
+  border: 1px solid var(--ck-border);
+  border-radius: var(--ck-r-lg);
+  box-shadow: var(--ck-sh-lg);
+}
+
+/* Collapse ------------------------------------------------------- */
+.ant-collapse.ck-collapse {
+  background: transparent !important;
+  border: none !important;
+}
+.ant-collapse.ck-collapse > .ant-collapse-item {
+  border: 1px solid var(--ck-border-soft) !important;
+  border-radius: var(--ck-r-md) !important;
+  margin-bottom: var(--ck-sp-3);
+  overflow: hidden;
+}
+.ant-collapse.ck-collapse > .ant-collapse-item:last-child {
+  margin-bottom: 0;
+}
+.ant-collapse.ck-collapse .ant-collapse-header {
+  align-items: center !important;
+  padding: 8px 12px !important;
+}
+.ant-collapse.ck-collapse .ant-collapse-content-box {
+  padding: var(--ck-sp-3) 12px !important;
+}
+
+/* Progress / spin ------------------------------------------------ */
+.ant-progress .ant-progress-bg {
+  border-radius: var(--ck-r-pill);
+}
+
+/* Radio ---------------------------------------------------------- */
+.ant-radio-wrapper {
+  font-size: var(--ck-fs-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
