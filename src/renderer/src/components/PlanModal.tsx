@@ -1,4 +1,4 @@
-import { Modal, Table, Tag } from 'antd'
+import { Modal, Table } from 'antd'
 import { useTranslation } from 'react-i18next'
 import type { PlanItem } from '@shared/index'
 import { ArrowRightIcon, ShieldIcon } from './icons'
@@ -18,10 +18,10 @@ const FIELD_KEY: Record<string, string> = {
   ctime: 'time.ctime'
 }
 
-const FIELD_COLOR: Record<string, string> = {
-  creation_time: 'blue',
-  mtime: 'green',
-  ctime: 'purple'
+const FIELD_CHIP: Record<string, string> = {
+  creation_time: 'ck-chip-blue',
+  mtime: 'ck-chip-green',
+  ctime: 'ck-chip-purple'
 }
 
 /**
@@ -92,9 +92,9 @@ export default function PlanModal({
             dataIndex: 'field',
             width: 132,
             render: (f: string) => (
-              <Tag color={FIELD_COLOR[f]} style={{ marginInlineEnd: 0 }}>
+              <span className={`ck-chip ${FIELD_CHIP[f] ?? 'ck-chip-neutral'}`}>
                 {t(FIELD_KEY[f] ?? f)}
-              </Tag>
+              </span>
             )
           },
           {

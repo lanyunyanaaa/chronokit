@@ -353,7 +353,7 @@ export default function SyncPage() {
           <span className="ck-actionbar-label">{t('common.writeTargets')}</span>
           <OptionBar value={opts} onChange={setOpts} showCtime={isWin} />
           <div className="ck-bar-sep" />
-          <span className="ck-hint">
+          <span className={`ck-bar-summary ${planned > 0 ? 'is-positive' : ''}`}>
             {planned > 0 ? t('sync.planReady', { n: planned }) : t('sync.planNone')}
           </span>
           <div className="ck-actionbar-spacer" />

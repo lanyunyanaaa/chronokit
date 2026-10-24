@@ -152,7 +152,7 @@ export default function TimeToolsPage() {
           <span className="ck-actionbar-label">{t('common.writeTargets')}</span>
           <OptionBar value={opts} onChange={setOpts} showCtime={isWin} />
           <div className="ck-bar-sep" />
-          <span className="ck-hint">{scopeHint}</span>
+          <span className="ck-bar-summary">{scopeHint}</span>
           <div className="ck-actionbar-spacer" />
           <Button
             type="primary"

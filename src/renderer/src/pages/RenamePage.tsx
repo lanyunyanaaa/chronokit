@@ -154,7 +154,7 @@ export default function RenamePage() {
           { label: t('rename.conflictSeq'), value: 'sequence', icon: <CheckOutlined /> }
         ]}
       />
-      <span className="ck-hint">
+      <span className="ck-bar-summary">
         {sel.length ? t('tools.scopeSelected', { n: scope.length }) : t('tools.scopeAll', { n: scope.length })}
       </span>
       <div className="ck-actionbar-spacer" />
@@ -169,7 +169,7 @@ export default function RenamePage() {
       pageProps={{ className: 'ck-page--fill' }}
       footer={
         <>
-          <span className="ck-hint">{t('rename.hint')}</span>
+          <span className="ck-bar-summary">{t('rename.hint')}</span>
           <div className="ck-actionbar-spacer" />
           <Button
             type="primary"

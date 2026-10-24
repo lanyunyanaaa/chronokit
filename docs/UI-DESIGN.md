@@ -43,6 +43,14 @@ layout    titlebarH 42 · sidenavW 212 · rowH 64 · toolH 32
 
 语义 chip：`ck-chip-blue`(元数据时间) · `ck-chip-purple`(文件名时间) · `ck-chip-green`(同名匹配/已执行) · `ck-chip-warn`(大小匹配/警告) · `ck-chip-red`(错误) · `ck-chip-neutral`(来源/标签) · `ck-chip-dash`(缺失值，虚线边)。**不再使用 antd 预设色 `<Tag color="processing">`**，避免与 token 体系脱钩。v3 起彩色 chip 一律**无边框**，白昼主题下靠淡底色 + 深色文字变体（blue .11 / purple .10 / green .11 / warn .12 / red .10 / neutral .06）；只有 `ck-chip-dash` 保留虚线边（缺失语义）。
 
+### v4.1 精修补充（2026-10-25 · v0.3.0）
+
+- **操作栏摘要 pill**：`.ck-bar-summary`——底部操作栏的状态摘要（可预览 N 对 / 可修复 N 类 / 作用域提示）从灰色 `ck-hint` 升格为带边 pill，数字 tabular；就绪态加 `is-positive`（淡绿底）。摘要永远在主按钮左侧，形成"状态 → 动作"配对。
+- **体检卡严重度锚点**：`.ck-issue.is-error/.is-warn/.is-info` 左缘 2.5px 内嵌色条（与文件选中"播放头"同隐喻）；`.ck-sev-dot` 用 `--ck-red/--ck-amber`（注意：语义色变量名是 red/amber/green，不存在 `--ck-danger/--ck-warning`）。
+- **Segmented 选中项浮起**：选中 thumb 加 `sh-sm` 阴影 + 600 字重，保证"当前模式"的层级强于行级选中态。
+- **时间码 mono 全覆盖**：批量表格单元格 `.ck-cell-time` 也走 `--ck-font-mono`；PlanModal 字段标签用 ck-chip（禁 antd Tag 预设色）。
+- 空态入口按钮 `.ck-empty-actions .ant-btn` 统一 min-width 108px。
+
 ---
 
 ## 3. 布局契约（DOM 与 CSS 分工）

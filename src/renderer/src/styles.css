@@ -464,6 +464,28 @@ body {
   letter-spacing: 0.3px;
   white-space: nowrap;
 }
+/* the bar's decision summary (plan ready / fixable count): promoted from a
+   grey hint to a scannable pill so the state reads before the buttons do */
+.ck-bar-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--ck-r-pill);
+  background: rgba(var(--ck-text-rgb), 0.055);
+  border: 1px solid var(--ck-border-soft);
+  color: var(--ck-text-2);
+  font-size: var(--ck-fs-md);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ck-bar-summary.is-positive {
+  background: rgba(var(--ck-green-rgb), 0.1);
+  border-color: rgba(var(--ck-green-rgb), 0.22);
+  color: var(--ck-green-text);
+  font-weight: 500;
+}
 .ck-actionbar-spacer {
   flex: 1;
 }
@@ -765,6 +787,10 @@ body {
   display: flex;
   gap: var(--ck-sp-3);
   margin-top: var(--ck-sp-4);
+}
+/* equal-width entry points so the pair reads as one choice */
+.ck-empty-actions .ant-btn {
+  min-width: 108px;
 }
 .ck-empty.is-drop {
   border: 1px dashed var(--ck-accent-line);
@@ -1147,6 +1173,12 @@ body {
   line-height: 24px;
   height: 24px;
 }
+/* the selected thumb lifts off the track so the active mode reads before
+   any row-level selection does */
+.ant-segmented .ant-segmented-item-selected {
+  box-shadow: var(--ck-sh-sm);
+  font-weight: 600;
+}
 
 /* Tables --------------------------------------------------------- */
 .ant-table-wrapper .ant-table {
@@ -1324,6 +1356,17 @@ body {
 .ck-issue:hover {
   border-color: var(--ck-border);
 }
+/* severity anchor on the leading edge — same inset-bar metaphor as the
+   selected media row's playhead */
+.ck-issue.is-error {
+  box-shadow: inset 2.5px 0 0 0 rgba(var(--ck-red-rgb), 0.62);
+}
+.ck-issue.is-warn {
+  box-shadow: inset 2.5px 0 0 0 rgba(var(--ck-amber-rgb), 0.62);
+}
+.ck-issue.is-info {
+  box-shadow: inset 2.5px 0 0 0 rgba(var(--ck-accent-rgb), 0.45);
+}
 
 .ck-issue-main {
   display: flex;
@@ -1355,12 +1398,12 @@ body {
   flex-shrink: 0;
 }
 .ck-sev-dot.sev-error {
-  background: var(--ck-danger);
-  box-shadow: 0 0 0 3px rgba(var(--ck-danger-rgb, 255, 59, 48), 0.14);
+  background: var(--ck-red);
+  box-shadow: 0 0 0 3px rgba(var(--ck-red-rgb), 0.14);
 }
 .ck-sev-dot.sev-warn {
-  background: var(--ck-warning);
-  box-shadow: 0 0 0 3px rgba(var(--ck-warning-rgb, 255, 169, 0), 0.16);
+  background: var(--ck-amber);
+  box-shadow: 0 0 0 3px rgba(var(--ck-amber-rgb), 0.16);
 }
 .ck-sev-dot.sev-info {
   background: var(--ck-accent);
@@ -1395,8 +1438,8 @@ body {
 
 .ck-issue-files {
   border-top: 1px solid var(--ck-border-soft);
-  background: var(--ck-bg);
-  padding: 6px 12px;
+  background: var(--ck-surface);
+  padding: 4px 12px 6px;
   display: flex;
   flex-direction: column;
 }
@@ -1456,6 +1499,7 @@ body {
   cursor: text;
   color: var(--ck-text);
   font: inherit;
+  font-family: var(--ck-font-mono);
   font-size: var(--ck-fs-sm);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;

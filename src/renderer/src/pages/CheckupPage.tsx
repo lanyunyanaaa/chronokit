@@ -244,7 +244,7 @@ export default function CheckupPage() {
           <span className="ck-actionbar-label">{t('common.writeTargets')}</span>
           <OptionBar value={opts} onChange={setOpts} showCtime={isWin} />
           <div className="ck-bar-sep" />
-          <span className="ck-hint">
+          <span className={`ck-bar-summary ${fixable.length ? 'is-positive' : ''}`}>
             {fixable.length
               ? t('checkup.fixableHint', {
                   n: fixable.length,

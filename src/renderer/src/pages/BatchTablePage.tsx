@@ -313,7 +313,7 @@ export default function BatchTablePage() {
       <Button size="small" type="primary" ghost disabled={op === 'set' && !opDate} onClick={applyBatch}>
         {t('table.batch.apply')}
       </Button>
-      <span className="ck-hint">
+      <span className="ck-bar-summary">
         {sel.length ? t('tools.scopeSelected', { n: sel.length }) : t('tools.scopeAll', { n: tablePaths.length })}
       </span>
       <div className="ck-actionbar-spacer" />
@@ -342,7 +342,9 @@ export default function BatchTablePage() {
           <span className="ck-actionbar-label">{t('common.writeTargets')}</span>
           <OptionBar value={opts} onChange={setOpts} showCtime={isWin} />
           <div className="ck-bar-sep" />
-          <span className="ck-hint">{t('table.planHint', { n: plan.items.length })}</span>
+          <span className={`ck-bar-summary ${plan.items.length > 0 ? 'is-positive' : ''}`}>
+            {t('table.planHint', { n: plan.items.length })}
+          </span>
           <div className="ck-actionbar-spacer" />
           <Button
             type="primary"
