@@ -5,7 +5,24 @@
   "main": "./out/main/index.js",
   "author": "ChronoKit contributors",
   "license": "MIT",
-  "homepage": "https://github.com/chronokit/chronokit",
+  "homepage": "https://github.com/lanyunyanaaa/chronokit#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lanyunyanaaa/chronokit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lanyunyanaaa/chronokit/issues"
+  },
+  "keywords": [
+    "video",
+    "metadata",
+    "timestamps",
+    "creation-time",
+    "exif",
+    "ffmpeg",
+    "electron",
+    "windows"
+  ],
   "engines": {
     "node": ">=20"
   },
